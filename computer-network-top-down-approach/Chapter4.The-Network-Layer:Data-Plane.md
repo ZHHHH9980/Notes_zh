@@ -149,3 +149,38 @@ The maximum amount of data that a link-layer frame can carry is called the **max
 MTU 代表着数据链路层帧的最大传输数量。每个 IP datagram 需要被封装到数据链路层的 frame 中，为了适应不同大小的 MTU，IP datagram 常常需要被分片传输。
 
 > 电子书是第八版的，已经删除了分片的图片介绍了。
+
+### 4.3.3 IPv4 Addressing
+
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/40f87bd3b1734cc4a87e68781e3ae8e0~tplv-k3u1fbpfcp-watermark.image?)
+
+IP 地址为该子网分配地址：223.1.1.0/24, 这个子网由三个主机接口地址加上一个路由器接口的地址(223.1.1.4)组成，/24 代表子网掩码，左侧前 24 位标识子网的地址。
+
+`subnet`
+因为 IP 地址是有限的，因此 IP 为孤岛分配了一个地址称为子网(subnet)
+
+#### Obtaining a Host Address: The Dynamic Host Configuration Protocol
+
+一旦一个机构申请到了一块 IP 地址，就会通过动态主机配置协议随机为机构中的主机随机动态分配一个临时的 IP 地址。
+
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7f508da00b814a32a9197e28dcb36caf~tplv-k3u1fbpfcp-watermark.image?)
+
+### IPv6 Datagram Format
+
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fba4237d1dfd4fc09e3202fc309626e0~tplv-k3u1fbpfcp-watermark.image?)
+（感觉这图有点问题，怎么上面还是 32bits?）
+IPv6 数据报格式,相比 Ipv4:
+
+- 扩展了地址能力。IPv6 将 IP 地址的容量从 32 位提升到了 128 位。IPv6 引入了一种新的地址类型，称为选播地址，允许将数据报传递到一组主机中的任何一个。
+
+- 头部精简到 40 个字节。IPv4 很多字段被废弃，加速了路由器的解析速度。
+
+- 流标记(Flow labeling)。标识了是音频或者视频传输的数据包。
+
+IPv6 不再提供的服务。
+
+- 分片与重组。IPv6 不会再将数据报拆分和重新组合，如果传输的数据包过大，那么 IPv6 协议中会直接丢弃这个数据报，并且通过 ICMP 协议发给发送方一个"Packet Too Big"的一个错误信息，让发送放发送一个更小一些的数据报。
+
+- Header Checksum(头部校验和)。IPv6 不再支持头部校验和，因为上层传输层服务和下层数据链路层的以太网协议通常会实现这个功能，校验和需要在分组每次达到路由器的时候重新计算，非常消耗时间。
+
+Options(选项)。这个字段删去后，生成了固定 40 字节长度的 IP 头部。
