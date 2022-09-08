@@ -79,3 +79,35 @@ this second HTTP GET? Did the server explicitly return the contents of the file?
 Explain.
 
     is 304. No, there is no `Content-Type` like field.
+
+
+## 3. Retrieving Long Documents
+
+这次的html文件比较大，达到了4500个字节，因此拆成了三个TCP的`segement`进行传输，在wireshark中用`reassembled PDU`标识。
+
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b47d7e7d12254c2aa673a79755909112~tplv-k3u1fbpfcp-watermark.image?)
+
+12. How many HTTP GET request messages did your browser send? Which packet
+number in the trace contains the GET message for the Bill or Rights?
+   
+    one.
+
+13. Which packet number in the trace contains the status code and phrase associated
+with the response to the HTTP GET request?
+    
+    
+
+
+    ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e595db659345471684fd10b266053952~tplv-k3u1fbpfcp-watermark.image?)
+    See the diagram.
+
+14. What is the status code and phrase in the response?
+
+    See the diagram.
+
+15. How many data-containing TCP segments were needed to carry the single HTTP
+response and the text of the Bill of Rights?
+
+    three.
+
+
