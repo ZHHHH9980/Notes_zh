@@ -26,7 +26,7 @@
 
 转发主要是硬件层面的，路由通常在软件层面实现，通常要花费几秒钟(seconds)。
 
-网络路由的一个核心元素是转发表(forward table)，路由对接收到的分组头部进行校0验，根据头部信息从转发表中查到对应的索引(index)。
+网络路由的一个核心元素是转发表(forward table)，路由对接收到的分组头部进行校 0 验，根据头部信息从转发表中查到对应的索引(index)。
 
 如图所示：
 
@@ -34,25 +34,24 @@
 
 ### Control Plane
 
-控制平面有两种方式，一种是传统的方式，一种是SDN的方式。
-1. 传统的方式通过路由算法计算出路由表。
-2. SDN如Figure 4.3所示，在远程控制器上计算路由表。这种方式更加灵活。称作软件定义网络(software-defined networking)
+控制平面有两种方式，一种是传统的方式，一种是 SDN 的方式。
 
+1. 传统的方式通过路由算法计算出路由表。
+2. SDN 如 Figure 4.3 所示，在远程控制器上计算路由表。这种方式更加灵活。称作软件定义网络(software-defined networking)
 
 ### 4.1.2 网络服务模型
 
 网络模型定义了从发送方到接收方端到端传输的特性。
 
-The Internet's network layer provides a single service, known as **best-effort service**. 
+The Internet's network layer provides a single service, known as **best-effort service**.
 
 互联网网络层提供了一个简单的服务称作尽力而为服务。既不能保证分组一定被接收，也不能保证按照发送顺序接收。
-
 
 ## 4.2 What's inside a Router ?
 
 - Input ports
-    
-   输入端口具有多个核心功能。一是物理层物理连接到路由器的终点。二起到数据链路层与其他链路互通操作的作用。更重要的是起到了一个查找的功能，控制分组(Control packets)携带了路由协议信息就需要从输入端口转发到路由处理器(routing processor)
+
+  输入端口具有多个核心功能。一是物理层物理连接到路由器的终点。二起到数据链路层与其他链路互通操作的作用。更重要的是起到了一个查找的功能，控制分组(Control packets)携带了路由协议信息就需要从输入端口转发到路由处理器(routing processor)
 
 - Switch fabric
 
@@ -60,40 +59,36 @@ The Internet's network layer provides a single service, known as **best-effort s
 
 - Output ports
 
-   输出端口存储从Switch fabric接收到的分组，并且传输给外部连接。这里提供了必要的链路层和物理层的能力。
+  输出端口存储从 Switch fabric 接收到的分组，并且传输给外部连接。这里提供了必要的链路层和物理层的能力。
 
 - Routing Processor.
 
-   路由处理器起到控制平面的功能。在传统路由器中，它执行路由协议维护路由表和链路状态信息。在SDN的路由器中，主要负责跟远端控制器(remote controller)通信，接收由remote controller传来的转发表，并且将这些转发表安装到Input ports中。
+  路由处理器起到控制平面的功能。在传统路由器中，它执行路由协议维护路由表和链路状态信息。在 SDN 的路由器中，主要负责跟远端控制器(remote controller)通信，接收由 remote controller 传来的转发表，并且将这些转发表安装到 Input ports 中。
 
 ### 4.2.1 Input Port Processing and Destination-Based Forwarding
 
-
 ![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/179eb35b83d24f42a1d9f5c1cd358ada~tplv-k3u1fbpfcp-watermark.image?)
 
+线路终点-> 数据连接传输（将数据链路层的 PDU 解封装） -> 查找，转发，排队
 
-线路终点-> 数据连接传输（将数据链路层的PDU 解封装） -> 查找，转发，排队
-
-之后是介绍接口匹配规则，遵循的是**longest prefix matching**，哪个能匹配到最多的前缀就走哪个接口，匹配不成功还有一个otherwise接口。
-
+之后是介绍接口匹配规则，遵循的是**longest prefix matching**，哪个能匹配到最多的前缀就走哪个接口，匹配不成功还有一个 otherwise 接口。
 
 ![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/06c80078f8f347099b6443cdec884d2e~tplv-k3u1fbpfcp-watermark.image?)
-书上的例子可以匹配到0号接口的21位，因此走0号。
+书上的例子可以匹配到 0 号接口的 21 位，因此走 0 号。
 
-Switch就不多提了，感觉跟软件关系不大。
+Switch 就不多提了，感觉跟软件关系不大。
 
 ### 4.2.4 哪里会发生排队？
 
 ![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8eaac87930c44ecb808190ef3d66f044~tplv-k3u1fbpfcp-watermark.image?)
 
-在链路比较拥塞的情况下，输入速率大于输出速率，内存占用就会不断上涨。当Output的队列满了以后就会出现分组丢失(packet lost)的情况，因为ouput的内存是有限的。
+在链路比较拥塞的情况下，输入速率大于输出速率，内存占用就会不断上涨。当 Output 的队列满了以后就会出现分组丢失(packet lost)的情况，因为 ouput 的内存是有限的。
 
-### Input Queueing 
+### Input Queueing
 
 输入端也会产生排队现象。
 
 由于输出端口一次只能通过一个分组，如果存在输入端同时有两个分组需要从同一个输出端输出，那么就会产生排队现象。
-
 
 ![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7892f5b056194d5a8a32ab6159662928~tplv-k3u1fbpfcp-watermark.image?)
 
@@ -104,14 +99,16 @@ Switch就不多提了，感觉跟软件关系不大。
 分组调度的几种策略。
 
 #### First-in-First-Out
+
 这种就是数据结构中队列一样的模型。
 
 #### Priority Queueing
+
 队列分成两种 一种高优一种低优，得等高优的全部清空，低优先级的队列才能传输分组。
 
 ### WFQ(weighted Fair Queueing)
 
-重量加权算法，保证多个队列的重量（packet个数)接近，之后按照编号123的顺序依次出队。核心点在于`Fair`，公平。
+重量加权算法，保证多个队列的重量（packet 个数)接近，之后按照编号 123 的顺序依次出队。核心点在于`Fair`，公平。
 
 ## 4.3 The Internet Protocol
 
@@ -123,25 +120,32 @@ IPv4 数据报格式
 
 从左到右从上到下:
 
-- Version：标识了IP的版本，路由器通过这个对对应版本数据报进行解析，这里是解析IPv4版本的datagram。
+- Version：标识了 IP 的版本，路由器通过这个对对应版本数据报进行解析，这里是解析 IPv4 版本的 datagram。
 
-- Header length: 通常是20字节，从上到下五行刚好20字节，但是有时候会有一些额外的选项在Options中。这时候头部长度就决定到底解析到哪里算是头部。
+- Header length: 通常是 20 字节，从上到下五行刚好 20 字节，但是有时候会有一些额外的选项在 Options 中。这时候头部长度就决定到底解析到哪里算是头部。
 
 - TOS: 老师说现在很少用了，先不深究了。
 
-- Datagram length: 为了适应以太网的帧长度，数据包往往会有最大显值，很少超过1500个字节。
+- Datagram length: 为了适应以太网的帧长度，数据包往往会有最大显值，很少超过 1500 个字节。
 
-- Indentifier, flags, fragmentation offset: 主要是作用于IP datagram 分片(fragmentation)中。通过计算与头部的一个偏移量得到数据报的具体顺序。之所以要分片是为了适应以太网的帧大小，之前提过这里通常不会超过1500字节。
+- Indentifier, flags, fragmentation offset: 主要是作用于 IP datagram 分片(fragmentation)中。通过计算与头部的一个偏移量得到数据报的具体顺序。之所以要分片是为了适应以太网的帧大小，之前提过这里通常不会超过 1500 字节。
 
 - Time-to-line: 数据报剩余存活次数，如果=0，它将会被丢弃。
 
-- Protocol: 这个字段决定IP datagram最终交给TCP还是UDP进行解析。
+- Protocol: 这个字段决定 IP datagram 最终交给 TCP 还是 UDP 进行解析。
 
-- Header checksum: 路由器会用这个字段进行IP datagram的差错校验。
+- Header checksum: 路由器会用这个字段进行 IP datagram 的差错校验。
 
-- Source and destination IP address. 目标和源IP地址 这个不多解释了。
+- Source and destination IP address. 目标和源 IP 地址 这个不多解释了。
 
 - Options: 一些拓展字段。
 
-- Data(payload)： 传输层入TCP/UDP中的段(segement)都包含在这里。
+- Data(payload)： 传输层入 TCP/UDP 中的段(segement)都包含在这里。
 
+### 4.3.2 IPv4 Datagram Fragmentation
+
+The maximum amount of data that a link-layer frame can carry is called the **maximum transmission unit(MTU)**.
+
+MTU 代表着数据链路层帧的最大传输数量。每个 IP datagram 需要被封装到数据链路层的 frame 中，为了适应不同大小的 MTU，IP datagram 常常需要被分片传输。
+
+> 电子书是第八版的，已经删除了分片的图片介绍了。
