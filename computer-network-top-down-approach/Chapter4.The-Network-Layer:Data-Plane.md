@@ -184,3 +184,24 @@ IPv6 不再提供的服务。
 - Header Checksum(头部校验和)。IPv6 不再支持头部校验和，因为上层传输层服务和下层数据链路层的以太网协议通常会实现这个功能，校验和需要在分组每次达到路由器的时候重新计算，非常消耗时间。
 
 Options(选项)。这个字段删去后，生成了固定 40 字节长度的 IP 头部。
+
+#### Transition from IPv4 to IPv6
+
+IPv4 的数以亿计的设备已经遍布全球，因此一次性全部升级显然不太可能，因此会存在 IPv4 与 IPv6 共存的情况，那么两者通信就需要一个转换(transition)的过程。
+
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/18166d79ecfb4cc7a65416608b0bf2e0~tplv-k3u1fbpfcp-watermark.image?)
+
+在 IPv4 和 IPv6 之间有一些系列介入机制称作隧道(tunnel), 当 IPv6 的数据报向 IPv4 传输，隧道会将 IPv6 的字段封装到 IPv4 中，并且生成 IPv4 的头部。如果是 IPv4 向 IPv6 传输数据报，那么隧道还会解封装 IPv4 的头部，放出 IPv6 的数据报。
+
+### 4.4 广义的转发和 SDN
+
+在网络核心的第二层和第三层中增加太多的中间盒子(middlebox),会增加网络维护的负担，因此有了一个更加优雅的方案，SDN，将统一的控制能力交给远端的控制器。在 SDN 中，路由器被称作分组交换机(packet switch)更加准确。SDN 引入了“匹配和行为”(match and action)的范式，OpenFlow（一个非常成功和广泛使用的 SDN 方式）。
+
+"match"匹配各个层之间的关键字段。
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1873004aebeb497dad4408f6e57419c8~tplv-k3u1fbpfcp-watermark.image?)
+
+"action"可以进行各种操作。
+
+- 转发。
+- 丢弃。
+- 修改字段(modify-field)。Figure 4.29 中的十个字段都可以修改，非常强大。

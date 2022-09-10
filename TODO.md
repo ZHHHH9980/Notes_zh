@@ -2,10 +2,10 @@
 
 ### Computer network
 
-- [ ] wireshark - HTTP - 65%
+- [x] wireshark - HTTP
 - [ ] 完善第一章节笔记
 - [ ] 完善第三章节实验 Implementing a Reliable Transport Protocol
-- [ ] 完善第四章节笔记 - 60%
+- [x] 完善第四章节笔记
 - [ ] 第五章节路由选择算法中提到的 dijkstra 算法
 
 ### Algorithm
@@ -13,6 +13,8 @@
 - [x] priority queues learn and implement
 - [x] heap sort learn and implement
 
-### spot bonus - nodejs
+### spot bonus
 
-- no sure yet
+leetcode
+
+- 新增 mergeKList (priority queue)
