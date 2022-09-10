@@ -58,3 +58,21 @@ class Quicksort extends Sort {
     return j;
   }
 ```
+
+## 面试速记
+
+```js
+partition核心操作：
+ 1. 选择一个值作为轴点,这里选择arr[lo]
+ 2. while(true) 中左右交替扫描
+ 3. 左侧扫描 while(less(v, arr[++i]))
+ 4. 右侧扫描 while(less(arr[--j], v))
+ 5. 左右扫描都结束，考察i，j位置情况
+ 6. 扫描结束交换轴点exch(lo, j)
+
+  v = arr[lo]
+
+  arr = [1,2,3,8, 4,5,6,9]
+         ^lo              ^hi + 1
+         ^i               ^j
+```
