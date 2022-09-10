@@ -3,9 +3,9 @@
 ### Computer network
 
 - [x] wireshark - HTTP
+- [x] 完善第四章节笔记
 - [ ] 完善第一章节笔记
 - [ ] 完善第三章节实验 Implementing a Reliable Transport Protocol
-- [x] 完善第四章节笔记
 - [ ] 第五章节路由选择算法中提到的 dijkstra 算法
 
 ### Algorithm
