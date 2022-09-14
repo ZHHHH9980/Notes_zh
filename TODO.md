@@ -1,4 +1,4 @@
-# Date: 2022/3/3 - 2022/3/12
+# Date: 2022/9/3 - 2022/9/12
 
 ### Computer network
 
@@ -18,3 +18,11 @@
 leetcode
 
 - 新增 mergeKList (priority queue)
+
+# Date: 2022/9/13 - 2022/9/18
+
+### Computer network
+
+- [ ] 完成第二章节笔记 - 20%
+- [ ] wireshark - DNS
+- [ ] 完成第五章节笔记
