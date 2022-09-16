@@ -33,3 +33,5 @@
 应用层协议目前主要有 HTTP（应用于 Web 端），SMTP（应用于电子邮件）。
 
 ## 2.2 The Web and HTTP
+
+> 打算阅读 HTTP2 in action 这本书，到时候也会对每个章节写一些笔记~
