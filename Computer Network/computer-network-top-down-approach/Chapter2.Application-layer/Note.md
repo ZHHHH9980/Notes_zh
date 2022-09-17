@@ -174,7 +174,9 @@ DNS 的组成：
 
 ![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/494f29825ccd45d5b5dd8640d2ba6ba8~tplv-k3u1fbpfcp-watermark.image?)
 
-上面三种服务器只用来查询下一级域名的 IP 地址，而 1.1.1.1 这类 DNS 服务器则把分步骤的查询过程自动化，方便用户一次性得到结果，所以它称为递归 DNS 服务器（recursive DNS server），即可以自动递归查询。
+上面三种服务器只用来查询下一级域名的 IP 地址，比如.root 获取到.edu.root/.com.root 等域名所在的解析系统的 IP 地址;
+
+而 1.1.1.1 这类 DNS 服务器则把分步骤的查询过程自动化，方便用户一次性得到结果，所以它称为递归 DNS 服务器（recursive DNS server），即可以自动递归查询。
 
 我们平常说的 DNS 服务器，一般都是指递归 DNS 服务器。它把 DNS 查询自动化了，只要向它查询就可以了。
 
