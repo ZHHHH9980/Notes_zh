@@ -24,5 +24,6 @@ leetcode
 ### Computer network
 
 - [ ] 完成第二章节笔记 - 80%
-- [ ] wireshark - DNS
+- [x] wireshark - DNS
 - [ ] 完成第五章节笔记
+- [x] HTTP/2 in Action 第一章节~
