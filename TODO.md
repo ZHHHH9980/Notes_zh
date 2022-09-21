@@ -27,3 +27,9 @@ leetcode
 - [x] wireshark - DNS
 - [ ] 完成第五章节笔记
 - [x] HTTP/2 in Action 第一章节~
+
+### Algorithm
+
+- [ ] 红黑树
+
+卡在红黑树上了，有点难说实话，进度会被放慢~
