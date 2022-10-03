@@ -36,15 +36,15 @@ var BSTTreeNode = /** @class */ (function (_super) {
         return this.parent !== null && this.parent.right === this;
     };
     // 找到左子树最右的节点就是前驱节点
-    BSTTreeNode.prototype._getSuccessor = function (node) {
+    BSTTreeNode.prototype._getPresuccessor = function (node) {
         while (node !== null && node.right !== null) {
             node = node.right;
         }
         return node;
     };
     // 获取前驱节点
-    BSTTreeNode.prototype.getSuccessor = function () {
-        return this._getSuccessor(this.left);
+    BSTTreeNode.prototype.getPresuccessor = function () {
+        return this._getPresuccessor(this.left);
     };
     return BSTTreeNode;
 }(TreeNode));
@@ -59,11 +59,12 @@ var BST_Interation = /** @class */ (function () {
     BST_Interation.prototype.size = function () {
         return this._size;
     };
+    // 自己写的，虽然很多，但是暂时测出什么问题
     BST_Interation.prototype._delete = function (node) {
         if (node == null) {
             return null;
         }
-        console.log("node", node);
+        this._size--;
         // 叶子节点
         if (!node.left && !node.right) {
             if (node.isLeftChild()) {
@@ -72,27 +73,25 @@ var BST_Interation = /** @class */ (function () {
             else if (node.isRightChild()) {
                 node.parent.right = null;
             }
-            else {
+            else { // 删除的是根节点
                 this.root = null;
             }
-            this._size--;
             console.log("delete leaf");
             return;
         }
         // 有两个子节点
         if (node.left && node.right) {
-            var successor = node.getSuccessor();
+            var presuccessor = node.getPresuccessor();
             // 覆盖
-            node.val = successor.val;
-            node.key = successor.key;
-            if (successor.isLeftChild()) {
-                successor.parent.left = successor.left;
+            node.val = presuccessor.val;
+            node.key = presuccessor.key;
+            if (presuccessor.isLeftChild()) {
+                presuccessor.parent.left = presuccessor.left;
             }
-            else if (successor.isRightChild()) {
-                successor.parent.right = successor.left;
+            else if (presuccessor.isRightChild()) {
+                presuccessor.parent.right = presuccessor.left;
             }
             console.log("delete two");
-            this._size--;
             return;
         }
         // 只有一个子节点
@@ -103,13 +102,44 @@ var BST_Interation = /** @class */ (function () {
         else if (node.isRightChild()) {
             node.parent.right = child;
         }
+        else { // 删除的是根节点
+            this.root = child;
+        }
         child.parent = node.parent;
         console.log("delete one");
+    };
+    /*
+    * @param node: 待删除节点
+    */
+    BST_Interation.prototype._delete_v2 = function (node) {
+        if (node == null) {
+            return null;
+        }
         this._size--;
+        if (node.left && node.right) {
+            var presuccessor = node.getPresuccessor();
+            // 覆盖
+            node.val = presuccessor.val;
+            node.key = presuccessor.key;
+            node = presuccessor;
+        }
+        var child = node.left ? node.left : node.right;
+        if (child !== null) { // 度为1 
+            child.parent = node.parent;
+        }
+        if (node.isLeftChild()) {
+            node.parent.left = child;
+        }
+        else if (node.isRightChild()) {
+            node.parent.right = child;
+        }
+        else { // 根节点
+            this.root = child;
+        }
     };
     BST_Interation.prototype["delete"] = function (key) {
         var node = this.get(key);
-        return this._delete(node);
+        return this._delete_v2(node);
     };
     BST_Interation.prototype.get = function (key) {
         if (this.root == null) {
@@ -165,3 +195,27 @@ var BST_Interation = /** @class */ (function () {
     };
     return BST_Interation;
 }());
+// 配合 bstCheck.js 使用
+function generateBST() {
+    var unique = {};
+    var arr = [];
+    for (var i = 0; i < 100; i++) {
+        var val = Math.round(Math.random() * 100);
+        if (!unique[val]) {
+            unique[val] = true;
+            arr.push(val);
+        }
+    }
+    var bst = new BST_Interation();
+    // 添加随机生成的树
+    for (var i = 0; i < arr.length; i++) {
+        bst.put(arr[i], i);
+    }
+    // 概率删除部分key
+    Object.keys(unique).forEach(function (key) {
+        if ((Math.random() * 100) > 70) {
+            bst["delete"](Number(key));
+        }
+    });
+    return bst;
+}

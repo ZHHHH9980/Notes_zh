@@ -31,7 +31,7 @@ class BSTTreeNode<Key, Value> extends TreeNode<Key, Value> {
   }
 
   // 找到左子树最右的节点就是前驱节点
-  private _getSuccessor(node: BSTTreeNode<Key, Value>) {
+  private _getPresuccessor(node: BSTTreeNode<Key, Value>) {
     while (node !== null && node.right !== null) {
       node = node.right;
     }
@@ -40,8 +40,8 @@ class BSTTreeNode<Key, Value> extends TreeNode<Key, Value> {
   }
 
   // 获取前驱节点
-  public getSuccessor() {
-    return this._getSuccessor(this.left);
+  public getPresuccessor() {
+    return this._getPresuccessor(this.left);
   }
 }
 
@@ -68,7 +68,7 @@ class BST_Interation<Key, Value> {
       return null;
     }
 
-    console.log("node", node);
+    this._size--;
 
     // 叶子节点
     if (!node.left && !node.right) {
@@ -76,30 +76,28 @@ class BST_Interation<Key, Value> {
         node.parent.left = null;
       } else if (node.isRightChild()) {
         node.parent.right = null;
-      } else {
+      } else { // 删除的是根节点
         this.root = null;
       }
 
-      this._size--;
       console.log("delete leaf");
       return;
     }
 
     // 有两个子节点
     if (node.left && node.right) {
-      const successor = node.getSuccessor();
+      const presuccessor = node.getPresuccessor();
       // 覆盖
-      node.val = successor.val;
-      node.key = successor.key;
+      node.val = presuccessor.val;
+      node.key = presuccessor.key;
 
-      if (successor.isLeftChild()) {
-        successor.parent.left = successor.left;
-      } else if (successor.isRightChild()) {
-        successor.parent.right = successor.left;
+      if (presuccessor.isLeftChild()) {
+        presuccessor.parent.left = presuccessor.left;
+      } else if (presuccessor.isRightChild()) {
+        presuccessor.parent.right = presuccessor.left;
       }
 
       console.log("delete two");
-      this._size--;
       return;
     }
 
@@ -109,16 +107,50 @@ class BST_Interation<Key, Value> {
       node.parent.left = child;
     } else if (node.isRightChild()) {
       node.parent.right = child;
+    } else { // 删除的是根节点
+      this.root = child ;
     }
     child.parent = node.parent;
 
     console.log("delete one");
+  }
+
+  /*
+  * @param node: 待删除节点
+  */
+  private _delete_v2(node: BSTTreeNode<Key, Value>) {
+    if (node == null) {
+      return null;
+    }
+
     this._size--;
+
+    if (node.left && node.right) {
+      const presuccessor = node.getPresuccessor();
+      // 覆盖
+      node.val = presuccessor.val;
+      node.key = presuccessor.key;
+      node = presuccessor;
+    }
+
+    const child = node.left ? node.left : node.right;
+    
+    if (child !== null) { // 度为1 
+      child.parent = node.parent;
+    } 
+
+      if (node.isLeftChild()) {
+        node.parent.left = child;
+      } else if (node.isRightChild()) {
+        node.parent.right = child;
+      } else { // 根节点
+        this.root = child;
+      }
   }
 
   public delete(key: Key) {
     const node = this.get(key);
-    return this._delete(node);
+    return this._delete_v2(node);
   }
 
   public get(key: Key) {
