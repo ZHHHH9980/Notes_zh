@@ -22,3 +22,8 @@
 [labuladong 算法小抄-js 实现](https://github.com/ZHHHH9980/Notes_zh/tree/master/Algorithm/labuladong) ■□□□□□□□□□
 
 [Algorithm 4](https://github.com/ZHHHH9980/Notes_zh/tree/master/Algorithm/Algorithm%204) ■■□□□□□□□□
+
+
+## other 
+部分代码使用.mjs后缀
+参考 [万岁，浏览器原生支持ES6 export和import模块啦！](https://www.zhangxinxu.com/wordpress/2018/08/browser-native-es6-export-import-module/)
