@@ -1,6 +1,6 @@
 
 // AVL TREE
-class AVLTreeNode<Key, Value> extends TreeNode<Key, Value> {
+class AVLTreeNode<Key, Value> extends BSTTreeNode<Key, Value> {
   public parent: AVLTreeNode<Key, Value> | null;
   public left: AVLTreeNode<Key, Value> | null;
   public right: AVLTreeNode<Key, Value> | null;
@@ -22,8 +22,7 @@ class AVLTreeNode<Key, Value> extends TreeNode<Key, Value> {
   }
 
   constructor(key, val, parent) {
-    super(key, val);
-    this.parent = parent;
+    super(key, val, parent);
     this.height = 1;
   }
 }
@@ -93,8 +92,11 @@ class AVLBST<Key, Value> {
     const child = parent.right;
 
     grand.left = child;
+    // change child, update height
     this._updateHeight(grand);
+
     parent.right = grand;
+    // change child, update height
     this._updateHeight(parent);
 
     // update parent's parent's left or right
@@ -106,6 +108,7 @@ class AVLBST<Key, Value> {
       this.root = parent;
     }
 
+    // update relative node's parent
     parent.parent = grand.parent;
     grand.parent = parent;
     if (child !== null) {
@@ -149,8 +152,56 @@ class AVLBST<Key, Value> {
         this._updateHeight(newNode);
       } else {
         this._rebalance(newNode);
+        break;
       }
     }
+  }
+
+  private _afterDelete(newNode: AVLTreeNode<Key, Value>) {
+    // 新添加的节点只会导致父级节点的失衡
+    while ((newNode = newNode.parent) !== null) {
+      // 新增节点有可能仍然保持平衡，但是需要更新高度
+      if (this._isBalanced(newNode)) {
+        this._updateHeight(newNode);
+      } else {
+        this._rebalance(newNode);
+      }
+    }
+  }
+
+  /*
+  * @param node: 待删除节点
+  */
+  private _delete_v2(node: AVLTreeNode<Key, Value>) {
+    if (node == null) {
+      return null;
+    }
+
+    this._size--;
+
+    if (node.left && node.right) {
+      const presuccessor = node.getPresuccessor() as AVLTreeNode<Key,Value>;
+      // 覆盖
+      node.val = presuccessor.val;
+      node.key = presuccessor.key;
+      node = presuccessor;
+    }
+
+    const child = node.left ? node.left : node.right;
+    
+    if (child !== null) { // 度为1 
+      child.parent = node.parent;
+    } 
+
+      if (node.isLeftChild()) {
+        node.parent.left = child;
+      } else if (node.isRightChild()) {
+        node.parent.right = child;
+      } else { // 根节点
+        this.root = child;
+      }
+
+      this._afterDelete(node);
   }
 
   public get(key: Key) {
@@ -212,6 +263,12 @@ class AVLBST<Key, Value> {
 
     this._afterAddNode(newNode);
     this._size++;
+  }
+
+
+  public delete(key: Key) {
+    const node = this.get(key);
+    return this._delete_v2(node);
   }
 }
 

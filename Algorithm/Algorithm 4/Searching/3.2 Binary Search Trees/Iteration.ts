@@ -76,7 +76,8 @@ class BST_Interation<Key, Value> {
         node.parent.left = null;
       } else if (node.isRightChild()) {
         node.parent.right = null;
-      } else { // 删除的是根节点
+      } else {
+        // 删除的是根节点
         this.root = null;
       }
 
@@ -107,8 +108,9 @@ class BST_Interation<Key, Value> {
       node.parent.left = child;
     } else if (node.isRightChild()) {
       node.parent.right = child;
-    } else { // 删除的是根节点
-      this.root = child ;
+    } else {
+      // 删除的是根节点
+      this.root = child;
     }
     child.parent = node.parent;
 
@@ -116,8 +118,8 @@ class BST_Interation<Key, Value> {
   }
 
   /*
-  * @param node: 待删除节点
-  */
+   * @param node: 待删除节点
+   */
   private _delete_v2(node: BSTTreeNode<Key, Value>) {
     if (node == null) {
       return null;
@@ -134,18 +136,20 @@ class BST_Interation<Key, Value> {
     }
 
     const child = node.left ? node.left : node.right;
-    
-    if (child !== null) { // 度为1 
-      child.parent = node.parent;
-    } 
 
-      if (node.isLeftChild()) {
-        node.parent.left = child;
-      } else if (node.isRightChild()) {
-        node.parent.right = child;
-      } else { // 根节点
-        this.root = child;
-      }
+    if (child !== null) {
+      // 度为1
+      child.parent = node.parent;
+    }
+
+    if (node.isLeftChild()) {
+      node.parent.left = child;
+    } else if (node.isRightChild()) {
+      node.parent.right = child;
+    } else {
+      // 根节点
+      this.root = child;
+    }
   }
 
   public delete(key: Key) {
@@ -232,11 +236,12 @@ function generateBST() {
   }
 
   // 概率删除部分key
-  Object.keys(unique).forEach(key => {
-    if ((Math.random() * 100) > 70) {
-      bst.delete(Number(key))
+  Object.keys(unique).forEach((key) => {
+    if (Math.random() * 100 > 70) {
+      bst.delete(Number(key));
     }
-  })
+  });
 
   return bst;
 }
+
