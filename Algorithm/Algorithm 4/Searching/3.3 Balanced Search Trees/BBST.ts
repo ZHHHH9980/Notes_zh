@@ -67,18 +67,40 @@ class BBST<Key, Value> {
     node.height = 1 + Math.max(leftHeight, rightHeight);
   }
 
+  /*
+   * 左旋是 parent 位于 grand 右侧， parent需要成为新的最高级节点
+   * grand 的右侧是 parent ，parent.left的位置将会变成grand
+   * 那么对应就需要取 parent.left的位置的child 作为 grand.right
+   *
+   **        grand                  parent
+   *              \                /
+   *             parent   ->     grand
+   *             /                 \
+   *           child               child
+   */
   protected _rotateLeft(grand: BBSTTreeNode<Key, Value>) {
     const parent = grand.right as BBSTTreeNode<Key, Value>;
     const child = parent.left;
+
     grand.right = child;
     parent.left = grand;
 
     this._afterRotate(grand, parent, child);
   }
 
+  /*
+   * 右旋是 parent 位于 grand 左侧， parent需要成为新的最高级节点
+   *
+   *         grand              parent
+   *         /                       \
+   *     parent           ->         grand
+   *        |                        /
+   *        child                   child
+   */
   protected _rotateRight(grand: BBSTTreeNode<Key, Value>) {
     const parent = grand.left as BBSTTreeNode<Key, Value>;
     const child = parent.right;
+
     grand.left = child;
     parent.right = grand;
 
@@ -90,18 +112,22 @@ class BBST<Key, Value> {
     parent: BBSTTreeNode<Key, Value>,
     child: BBSTTreeNode<Key, Value> | null
   ) {
-    // update parent's parent's left or right
+    // update grand's parent's child
     if (grand.isLeftChild()) {
       (grand.parent as BBSTTreeNode<Key, Value>).left = parent;
     } else if (grand.isRightChild()) {
       (grand.parent as BBSTTreeNode<Key, Value>).right = parent;
     } else {
+      // grand == this.root
       this.root = parent;
     }
 
-    // update relative node's parent
+    // 1. parent 继承 grand的 parent
+    // 2. parent 成为 grand parent
     parent.parent = grand.parent;
     grand.parent = parent;
+
+    // child possibly will be null
     if (child !== null) {
       child.parent = grand;
     }

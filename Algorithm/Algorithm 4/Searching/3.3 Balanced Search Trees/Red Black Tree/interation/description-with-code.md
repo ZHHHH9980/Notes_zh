@@ -1,13 +1,22 @@
 # description with code
 
+## 添加
+
 ## 删除
 
 流程判断图
 ![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/99c00e5f2adf4a3995e04c14a424585e~tplv-k3u1fbpfcp-watermark.image?)
 
-### 处理兄弟节点为黑色，并且至少有一个红色子节点的情况
+### 「处理兄弟节点为黑色，并且至少有一个红色子节点的情况」
 
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/85deaeb366d346498fb5634dc738f5ce~tplv-k3u1fbpfcp-watermark.image?)
+这里有三种情况：
+
+1. 红色子节点在黑色兄弟节点右侧
+2. 红色子节点在黑色兄弟节点左侧
+3. 黑色兄弟有两个红色子节点
+
+对于情况 1，我们需要先**左旋兄弟节点**，这样红色节点都位于黑色兄弟节点左侧，以保证三种情况可以统一处理。
 
 ```js
 class RBTree {
@@ -66,6 +75,8 @@ class RBTree {
           afterDelete(parent, null);
         }
       } else {
+        // 「处理兄弟节点为黑色，并且至少有一个红色子节点的情况」
+
         // 兄弟节点至少有一个红色子节点，向兄弟节点借元素
         if (isBlack(sibling.left)) {
           // 兄弟节点左边是黑色，先旋转兄弟节点
