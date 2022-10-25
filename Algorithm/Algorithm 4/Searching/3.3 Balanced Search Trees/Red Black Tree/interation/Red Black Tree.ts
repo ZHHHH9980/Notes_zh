@@ -116,15 +116,7 @@ class RedBlackTree<Key, Value> {
    *             /                 \
    *           child               child
    */
-  private _rotateLeft(grand) {
-    const parent = grand.right;
-    const child = parent.left;
 
-    grand.right = child;
-    parent.left = grand;
-  }
-
-  /*
   private _rotateLeft(grand: RedBlackTreeNode<Key, Value>) {
     const parent = grand.right as RedBlackTreeNode<Key, Value>;
     const child = parent.left;
@@ -134,7 +126,6 @@ class RedBlackTree<Key, Value> {
 
     this._afterRotate(grand, parent, child);
   }
-  */
 
   /*
    * 右旋是 parent 位于 grand 左侧， parent需要成为新的最高级节点
@@ -145,8 +136,8 @@ class RedBlackTree<Key, Value> {
    *        |                        /
    *        child                   child
    */
-  protected _rotateRight(grand: BBSTTreeNode<Key, Value>) {
-    const parent = grand.left as BBSTTreeNode<Key, Value>;
+  protected _rotateRight(grand: RedBlackTreeNode<Key, Value>) {
+    const parent = grand.left as RedBlackTreeNode<Key, Value>;
     const child = parent.right;
 
     grand.left = child;
