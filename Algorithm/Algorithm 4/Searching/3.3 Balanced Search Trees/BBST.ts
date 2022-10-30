@@ -162,6 +162,7 @@ class BBST<Key, Value> {
   }
 
   public _afterAddNode(newNode: any) {}
+
   //   private _afterAddNode(newNode: BBSTTreeNode<Key, Value>) {
   //     // 新添加的节点只会导致父级节点的失衡
   //     while ((newNode = newNode.parent) !== null) {
