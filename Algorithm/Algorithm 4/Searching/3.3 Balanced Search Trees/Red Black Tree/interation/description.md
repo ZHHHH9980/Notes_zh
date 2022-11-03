@@ -37,21 +37,23 @@
    新增的节点是红色，如果新增节点的 parent 节点也是红色，从 B 树角度出发，说明 parent 已经融合成了一个 B 树节点，那么新增的节点已经溢出，需要重新平衡。
 
    1. 叔叔节点不是红色
+
       - LL
       - RR
       - LR
       - RL
+
    2. 叔叔节点是红色
 
 ### 2.1 叔叔节点不是红色
 
-叔叔节点指的是父节点的另外一个兄弟（同级）节点，比如 10 的叔叔节点是 33。
+叔叔节点指的是父节点的另外一个兄弟（同级）节点，比如 50 的叔叔节点是 null，也就是黑色节点。
 
-// TODO: 这里要补一张图
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5f3e02a5742745a9bb3e8877d66d13a1~tplv-k3u1fbpfcp-watermark.image?)
 
 #### LL/RR
 
-这里有点像 AVL 树中的 LL/RR，LL 指的是两个红色节点位于左子节点和左子节点的左子节点。
+这里有点像 AVL 树中的 LL/RR，LL 指的是两个相连的红色节点位于左子节点和左子节点的左子节点。
 
 新增节点命名为 newNode
 
@@ -62,7 +64,7 @@ RR: 左旋 newNode.parent.parent
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0decba9258354df9b118949bf5ba1b66~tplv-k3u1fbpfcp-watermark.image?)
 （图中 灰色节点别管，只是示意这里可以添加）
 
-以左旋为例，新的根节点会变成黑色，发生旋实际上是**一个链表**。经过旋转后变成一颗相对平衡的子树，从 B 树角度上说是一个含有 3 个 key 的 B 树节点。
+以左旋为例，新的根节点会变成黑色，发生旋转实际上是**一个链表**。经过旋转后变成一颗相对平衡的子树，从 B 树角度上说是一个含有 3 个 key 的 B 树节点。
 
 #### LR/RL
 
@@ -73,6 +75,12 @@ RR: 左旋 newNode.parent.parent
 LR：先左旋 newNode.parent 之后右旋 newNode.parent.parent
 
 RL：先右旋 newNode.parent 之后左旋 newNode.parent.parent
+
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0201a4fdf5f54dafaa3f68e2b77725fc~tplv-k3u1fbpfcp-watermark.image?)
+
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a3ccb8ef1c704f22a6899e8524a2930e~tplv-k3u1fbpfcp-watermark.image?)
+
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4d9c42d0576c42b48b945f76111a31ac~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 2.2 叔叔节点是红色
 
@@ -95,6 +103,9 @@ RL：先右旋 newNode.parent 之后左旋 newNode.parent.parent
 
 ![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/90c7ef3d253e4bee93a55d9c2d368a0b~tplv-k3u1fbpfcp-watermark.image?)
 比如这种情况，55 上溢，38，和 55 右侧节点变黑，55 上溢变红，再将 55 染黑即可（因为是根节点）。并不破坏性质。
+
+流程图：
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/13c5740317d645ecadeba47ceba3f5ab~tplv-k3u1fbpfcp-watermark.image?)
 
 ## 删除
 
@@ -198,3 +209,7 @@ child = black
 平衡标准比较严格，左右子树高度差不超过 1
 
 搜索次数远远大于插入和删除，选择 AVL 树；搜索、插入、删除次数差不多，选择红黑树。
+
+### other
+
+[在线生成红黑树](https://www.wxqsearch.cn/demo/rbtree)

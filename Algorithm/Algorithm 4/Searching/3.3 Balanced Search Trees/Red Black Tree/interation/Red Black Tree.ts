@@ -95,6 +95,7 @@ class RedBlackTree<Key, Value> {
     let parent = this.root;
     let cur: RedBlackTreeNode<Key, Value> | null = this.root;
 
+    // 找到当前节点要挂载的parent
     while (cur != null) {
       parent = cur;
 
@@ -271,6 +272,7 @@ class RedBlackTree<Key, Value> {
     }
   }
 
+  // @param node 添加的新节点
   private _afterAddNode(node: RedBlackTreeNode<Key, Value>) {
     const parent = node.parent;
 
