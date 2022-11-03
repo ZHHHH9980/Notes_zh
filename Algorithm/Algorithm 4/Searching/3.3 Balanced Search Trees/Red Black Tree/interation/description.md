@@ -84,6 +84,8 @@ RL：先右旋 newNode.parent 之后左旋 newNode.parent.parent
 
 ### 2.2 叔叔节点是红色
 
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3017a28c2caa4f7f9fc9df121b566d0d~tplv-k3u1fbpfcp-watermark.image?)
+
 #### LL/RR
 
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e2ca204bd46346608063270fd94e95e3~tplv-k3u1fbpfcp-watermark.image?)
