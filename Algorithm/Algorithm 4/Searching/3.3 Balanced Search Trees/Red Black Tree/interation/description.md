@@ -112,7 +112,7 @@ RL：先右旋 newNode.parent 之后左旋 newNode.parent.parent
 ## 删除
 
 > 需要特别注意的点是，最终删除的节点一定是**叶子节点**！
-> 如果删除的不是叶子节点，也会用前驱/后继节点替换当前要删除的非叶子节点，那么最终删除的还是前驱/后继节点。
+> 因为，如果删除的不是叶子节点，也会用前驱/后继节点替换当前要删除的非叶子节点，那么最终删除的还是前驱/后继节点。
 
 ### 删除叶子节点
 
@@ -130,14 +130,10 @@ RL：先右旋 newNode.parent 之后左旋 newNode.parent.parent
 
 ### 2.1 删除拥有两个 RED 节点的黑色节点
 
-这种情况应该比较简单，只需要取其中一个红色节点替代删除节点就行。
-// TODO 补一副图
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9a54dae6df264e99b2f112e3260102d2~tplv-k3u1fbpfcp-watermark.image?)
 
-被删除节点命名为 deleteNode
-
-deleteNode.key = deleteNodde.left.key
-
-deleteNode.left = null
+这里一开始也没想明白，后来画了图就懂了。
+最终还是会走到判断删除节点为红色的情况下的逻辑，因为覆盖删除的逻辑不会出现这种情况。
 
 ### 2.2 删除拥有一个 RED 节点的黑色节点
 
@@ -145,15 +141,11 @@ deleteNode.left = null
 
 ![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3076a3853bb348169280c35ca0c20be0~tplv-k3u1fbpfcp-watermark.image?)
 
-被删除节点命名为 deleteNode
+replacement 是替代的红色子节点
 
-child = deleteNode.child
+black(replacement) 染黑即可维持性质
 
-deleteNode.parent.child = child
-
-child = black
-
-### 2.3 删除黑色叶子节点
+### 2.3 删除黑色叶子节点(最复杂情况)
 
 #### 2.3.1 删除黑色叶子节点 - 兄弟节点为黑色
 
@@ -166,11 +158,22 @@ child = black
 
 #### 2.3.1.1 黑色兄弟节点至少有一个红色子节点
 
-考虑红色节点的位置，进行旋转。
+1.考虑红色节点的位置，进行旋转。
 
-旋转后的中心节点继承 deleteNode.parent 的颜色。
+2.旋转后的中心节点继承 deleteNode.parent 的颜色。
 
-中心节点的左右节点染黑色。
+3.中心节点的左右节点染黑色。
+
+兄弟节点至少有一个红色子节点的情况有以下三种：
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3a9ce78637e6482c8ff906ae6f391754~tplv-k3u1fbpfcp-watermark.image?)
+
+其中情况 2、3 是一样的，那么对于情况 1 ：
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/42abb353a4044b0cb87f5ccc0da4e6c4~tplv-k3u1fbpfcp-watermark.image?)
+左旋一波 sibling，就可以三种情况统一了。
+
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fbdf986bdfcd48c88de5d9ec43caf9d7~tplv-k3u1fbpfcp-watermark.image?)
+之后右旋 parent，sibling 变成中心节点，继承 parent 颜色，左右节点容染黑。
+
 <br/>
 
 #### 2.3.1.2 黑色兄弟节点没有红色子节点
@@ -188,9 +191,11 @@ child = black
 
 对于兄弟是红色节点的情况，这里举个实例：
 
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3744748f870d42e086525645b934dfe0~tplv-k3u1fbpfcp-watermark.image?)
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/383e7c2a18154906aeb4cfc617b19a1a~tplv-k3u1fbpfcp-watermark.image?)
 
 我们对 80 进行右旋，这样就让 76 成为自己的兄弟节点，既然产生了黑色的兄弟节点，那么就又回到了「黑色兄弟」节点的相关逻辑。
+
+**那么在实际代码里这里应该最先处理**
 
 ## 时间复杂度
 
