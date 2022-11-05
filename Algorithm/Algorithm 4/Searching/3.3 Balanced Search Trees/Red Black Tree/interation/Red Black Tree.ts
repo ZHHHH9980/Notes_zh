@@ -364,11 +364,44 @@ class RedBlackTree<Key, Value> {
     // 1. parent -(left)-> child -> null =>  parent -(left)-> null 的删除方式
     // 2. parent 下溢进入这里的情况，并没有真正删除
     // isLeftChild => parent.left !== null && this === parent.left
-    const left = parent.left == null || parent.isLeftChild();
+    const left = parent.left == null || deleteNode.isLeftChild();
 
     let sibling = left ? parent.right : parent.left;
     if (left) {
       // 被删除节点位于左侧，兄弟节点位于右侧
+
+      if (this._isRed(sibling)) {
+        // 兄弟节点为红色，转成黑色
+        this._black(sibling);
+        this._red(parent);
+        this._rotateLeft(parent);
+        // 旋转后更换兄弟
+        sibling = parent.right;
+      }
+
+      // 处理兄弟节点为黑色的情况
+      if (this._isBlack(sibling.left) && this._isBlack(sibling.right)) {
+        const parentIsBlack = this._isBlack(parent);
+        this._black(parent);
+        this._red(sibling);
+
+        // 原来的节点被删除，父节点成为新的黑色叶子节点，也会发生下溢
+        if (parentIsBlack) {
+          this._afterDelete(parent, null);
+        }
+      } else {
+        if (this._isBlack(sibling.right)) {
+          this._rotateRight(sibling);
+          sibling = parent.right;
+        }
+
+        // 借上去的兄弟节点成为了中心节点，那么要继承parent的颜色
+        sibling.color = parent.color;
+        this._black(sibling.right);
+        this._black(parent);
+
+        this._rotateLeft(parent);
+      }
     } else {
       // 被删除节点位于右侧，兄弟节点位于左侧
 

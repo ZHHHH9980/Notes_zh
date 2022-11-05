@@ -179,7 +179,7 @@ class RBTree {
     this._afterDelete(node, null);
   }
 
-  // BST 删除节点后会调用这个方法，将删除节点和取代节点传入
+  // 删除节点后会调用这个方法，将删除节点和取代节点传入
   private _afterDelete(deleteNode, replacement) {
     /*   删除的节点是红色  */
     if (isRed(deleteNode)) {
