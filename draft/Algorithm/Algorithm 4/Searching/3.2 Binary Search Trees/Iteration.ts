@@ -244,4 +244,3 @@ function generateBST() {
 
   return bst;
 }
-
