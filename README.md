@@ -8,9 +8,9 @@
 
 ## Computer network
 
-[Computer-Networking-A-Top-Down-Approach](https://github.com/ZHHHH9980/Notes_zh/tree/master/Computer%20Network/computer-network-top-down-approach) ■■■■□□□□□□
+[Computer-Networking-A-Top-Down-Approach]() ■■■■□□□□□□
 
-[HTTP/2 in Action](https://github.com/ZHHHH9980/Notes_zh/tree/master/Computer%20Network/HTTP2%20in%20Action)
+[HTTP/2 in Action]()
 
 <br/>
 
@@ -18,6 +18,6 @@
 
 目标刷完所有章节，并且用 js 自己实现一遍。
 
-[labuladong 算法小抄-js 实现](https://github.com/ZHHHH9980/Notes_zh/tree/master/Algorithm/labuladong) ■□□□□□□□□□
+[labuladong 算法小抄-js 实现]() ■□□□□□□□□□
 
-[Algorithm 4](https://github.com/ZHHHH9980/Notes_zh/tree/master/Algorithm/Algorithm%204) ■■□□□□□□□□
+[Algorithm 4]() ■■■□□□□□□□
