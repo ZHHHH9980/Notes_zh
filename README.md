@@ -8,9 +8,9 @@
 
 ## Computer network
 
-[Computer-Networking-A-Top-Down-Approach]() ■■■■□□□□□□
+[Computer-Networking-A-Top-Down-Approach] ■■■■□□□□□□
 
-[HTTP/2 in Action]()
+[HTTP/2 in Action]
 
 <br/>
 
@@ -18,6 +18,6 @@
 
 目标刷完所有章节，并且用 js 自己实现一遍。
 
-[labuladong 算法小抄-js 实现]() ■□□□□□□□□□
+[labuladong 算法小抄-js 实现] ■□□□□□□□□□
 
-[Algorithm 4]() ■■■□□□□□□□
+[Algorithm 4] ■■■□□□□□□□
