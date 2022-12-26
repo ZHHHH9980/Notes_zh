@@ -157,14 +157,12 @@ class AVLBST<Key, Value> {
     }
   }
 
-  private _afterDelete(newNode: AVLTreeNode<Key, Value>) {
-    // 新添加的节点只会导致父级节点的失衡
-    while ((newNode = newNode.parent) !== null) {
-      // 新增节点有可能仍然保持平衡，但是需要更新高度
-      if (this._isBalanced(newNode)) {
-        this._updateHeight(newNode);
+  private _afterDelete(deleteNode: AVLTreeNode<Key, Value>) {
+    while ((deleteNode = deleteNode.parent) !== null) {
+      if (this._isBalanced(deleteNode)) {
+        this._updateHeight(deleteNode);
       } else {
-        this._rebalance(newNode);
+        this._rebalance(deleteNode);
       }
     }
   }
