@@ -1,6 +1,11 @@
 # Lab2
 
 2023.1.2开始 明天就上班了，估计进度会被拖延。
+2023.1.7 解决（chao xi）了`wrap`&`unwrap`
+2023.1.8 开始面向测试编程
+2023.1.8 ~ 2023.1.9 不停面向测试编程，熟悉各种使用场景
+2023.1.10 上班摸鱼时间重构代码
+2023.1.11 完成
 
 ## The TCP Receiver TCP接收器
 
@@ -48,5 +53,99 @@ In TCP, `acknowledgement`意味着，接受者所期待的下一个字节的索�
     提示：最简单的实现应该使用`wrapping_integers.hh`中的辅助函数。`wrap/unwrap`操作应该保留偏移量，两个相差17的序列号(seqnos),对应的绝对序列号(absolute seqnos)也应该相差17.
 
 
+我一开始是这样写`wrap`的,问题就出在我用一个32位无符号去模64位无符号，肯定是会导致32被转成64位，再取模。
+
+```c++
+    // absolute seqno -> seqno
+WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
+    uint32_t max = 1 << 31;
+    uint32_t seqno = (static_cast<uint64_t>(isn.raw_value()) + n) % max;
+
+    return WrappingInt32{seqno};
+}
+```
+那么应该这么写
+
+```c++
+WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
+    uint64_t max = 1 << 31;
+    uint32_t seqno = (static_cast<uint64_t>(isn.raw_value()) + n) % max;
+
+    return WrappingInt32{seqno};
+}
+```
+
+但是看了下其他大佬的写法，明显优雅的多，其实只要保证在同一个维度上做模运算就不会出问题。
+这个写法就是在32位无符号这个维度上运算的。
+```c++
+WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
+    uint32_t tmp = (n << 32) >> 32;
+    return isn + tmp;
+}
+```
+
+接下来是`unwrap`，这个东西真的卡了我好久，一度让我怀疑我的智商。
+当时的思路是计算出n 和 checkpoint在32int下的diff绝对值，再直接加到checkpoint上。
+```c++
+ // seqno -> absolute seqno
+uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
+
+    uint64_t max = 1 << 31;
+    uint32_t checkpoint_seq_offset = static_cast<uint32_t>(checkpoint % max) - isn.raw_value();
+    uint32_t n_offset = n.raw_value() - isn.raw_value();
+
+    uint32_t offset = n_offset - checkpoint_seq_offset;
+    uint64_t n_checkpoint_offset = static_cast<uint64_t>(abs(int(offset)));
+
+    uint64_t res = checkpoint + n_checkpoint_offset;
+
+    return res;
+
+}
+```
+实在是搞不清楚到底错哪了，这边我只好找一份比较能[理解的代码来学习了](https://zhuanlan.zhihu.com/p/265156728)。
+```c++
+uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
+    uint64_t diff = n.raw_value() - isn.raw_value();
+
+    if (checkpoint <= diff)   {
+        return diff;
+    }
+    else {
+        uint64_t size_period = 1ul << 32, quotient, remainder;   
+        quotient = (checkpoint - diff) >> 32;
+        remainder = ((checkpoint - diff) << 32) >> 32;
+        if (remainder < size_period / 2)
+            return diff + quotient * size_period;
+        else
+            return diff + (quotient + 1) * size_period;
+    }
+}
+```
+
+转成absolute_seqno可能会有多个可能的值，因为会有多次`wrap`的情况，这里考虑了两种情况，一种是无wrap，也就是checkpoint会小于等于diff，如果大于diff，就需要判断取模的余数跟哪个临界点更接近，判断的依据就是周期的一半，类似与四舍五入的操作。
 
 ## 3.2 实现TCP接收器
+功能：
+1. 接收segment
+2. 使用`StreamReaseemblre`重组字节流
+3. 计算ACK以及window size
+
+TCP segement组成，非灰色的是需要重点关注的字段。
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f89a1eb15c624da4822177eb0ce9532e~tplv-k3u1fbpfcp-watermark.image?)
+
+### segement_received()
+主要工作方法，每次接收到segment都会被调用。
+1. 如果有必要的话，设置ISN(Initial Sequence Number). 
+第一个到达且带有SYN flag的segemnt的序列号将是初始序列号，需要跟踪它以保证seq和absolute seq直之间的转换。
+2. 推送所有数据，或者流结束的标志给`StreamReassembler`。如果FIN被设置，那么payload的最后一个字节是整个流的最后一个字节。注意`StreamReassembler`需要流的索引从0开始，那么必须`unwrap`seqno来生成。
+
+## TODO
+1. 结合CSAPP这本书，了解64位模一个32位数会得到什么结果。
+2. unwrap这块其实不是特别能理解，emmm，只能知道是一个四舍五入的操作，以后如果有时间再投入吧。
+
+## 参考
+
+[知乎](https://zhuanlan.zhihu.com/p/265156728)
+
+[额外发现的B站视频](https://www.bilibili.com/video/BV1mK411f7B1/?spm_id_from=333.337.search-card.all.click&vd_source=4428275621435abc77c0ccd828a444b9)
