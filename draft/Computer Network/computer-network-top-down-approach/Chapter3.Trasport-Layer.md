@@ -92,7 +92,7 @@ Sliding window = [N, N + 1, N + 2], wait for ACK = N + 1, N + 2, N + 3
 
 > Thus, TCP's error-recovery mechanism is probably best categorized as a hybrid of GBN & SR protocols
 
-TCP 错误重传机制更像是二者的结合，TCP本地只维护一个`NextSeqNumber`（Go-Back_N)，通过`SendBase`（初始值）和`NextSeqNumber`来确认哪个包没收到，从而只重传没收到的包(SR)
+TCP 超时机制更像是二者的结合，TCP本地只维护一个`NextSeqNumber`（Go-Back_N)，通过`SendBase`（初始值）和`NextSeqNumber`来确认哪个包没收到，从而只重传没收到的初始包(SendBase)
 
 
 

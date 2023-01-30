@@ -23,7 +23,7 @@
 ![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/cb95525aa89d4737b8b04930b1c9b8d5~tplv-k3u1fbpfcp-watermark.image?)
 
 
-## 前置
+## Part1.中文翻译
 
 Lab3需要实现连接的另一端:`TCPSender`是一个将外部字节流转换成`segement`（将形成不可靠的`datagram`）的工具。从`ByteStream`中读取数据，并将其转换成一系列向外传输的TCP segsments。在另一端，一个TCP接收器会将这些segment反转成原来的字节流，并且发送ACK和window建议值给发送方。
 
@@ -164,16 +164,84 @@ TCP发送器和接收器各自负责TCP segment中的一部分。TCP发送器写
 
 ---------------------------------
 
-## 重新学习
+## Part2. 重新学习
 进入Lab4之后感觉自己写的很乱，全是面向测试编程，参考学习了别人的笔记，看看别人是怎么思考的。
+
+TCPSender主要有三个功能需要实现：
+- ack_received 接收到remote发过来的ack，决定是否更新自身窗口值，重启定时器等
+- fill_window 这个fill_window我理解实际上是填充remote window，根据当前Sended的状态来发送segment
+- timer 超时重传定时器
+
+## 2.1 ack_received
+
+自动重传有两种协议，一种是停止等待协议，另一种是流水线（pipelining)协议，这里需要实现的自然是效率高的pipelining,常见的pipelining的协议有两种：
+
+1. **Go-Back-N protocol**
+2. **Selective Repeat protocal**
+
+维护一个Silding window，size = 1采用Go-Back-N, size > 1 采用 Selective Repeat
+
+```
+Go-Back-N
+发送 N, N + 1, N + 2
+Sliding window = [N], wait for ACK = NextSeqNumber， 如果ACK = NextSeqNumber超时，将会重传N，N + 1,N + 2
+
+Seletive Repeat
+发送 N, N + 1, N + 2
+Sliding window = [N, N + 1, N + 2], wait for ACK = N + 1, N + 2, N + 3
+如果ACK = N + 1 超时，超时前接收到ACK = N + 2, N + 3
+将会重传只重传N 这个segment
+
+```
+
+这里是《自顶向下》的原文，跟实验文档对应上了：
+
+> Thus, TCP's error-recovery mechanism is probably best categorized as a hybrid of GBN & SR protocols
+
+**TCP 超时机制更像是二者的结合，TCP本地只维护一个`NextSeqNumber`（Go-Back_N)，通过`SendBase`（初始值）和`NextSeqNumber`来确认哪个包没收到，从而只重传没收到的初始包(Seletive Repeat)。**
+
+
+```
+// 发送窗口
+sender_window = [sendBase, _next_seqno]
+```
+
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f4121c73338240c49f071977bac55524~tplv-k3u1fbpfcp-watermark.image?)
+
+那么对于sender:
+
+1. 如果收到的ack不属于发送窗口的范围，将直接忽略。
+2. 如果收到的ack属于这个范围，那么这个ack的含义是之前的所有segment都被确认接收到了，重传队列里应该移除ACK之前的segment。
+
+## 2.2 fill_window
+
+首先TCP Sender是有以下状态需要维护的：
 
 ![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/97024277dfad4d96be28cbc80910bb72~tplv-k3u1fbpfcp-watermark.image?)
 
+那么fill_window需要根据这些状态决定发送哪些segment。
+
+
+## 2.3 timer
+
+- 超时了重传哪个segment?
+
+    根据2.1 的描述，如果出现超时的情况，重传sendBase对应的segment。
+
+- 定时器开启，关闭的时机
+
+RFC6298:
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/196d4e516bbf4a749fff1f679f15285f~tplv-k3u1fbpfcp-watermark.image?)
 
 
 ## 参考
 
 [计算机网络学习笔记-CS144](https://tarplkpqsm.feishu.cn/docx/doxcnpBEN4SG3vA9pVyCoANigBh)
+
 [康宇's blog](https://www.cnblogs.com/kangyupl/p/stanford_cs144_labs.html)
+
 [Lexssama's Blogs](https://lexssama.github.io/2021/04/08/CS144-lab3/)
+
+[RFC 6298](https://datatracker.ietf.org/doc/rfc6298/?include_text=1)
+
 
