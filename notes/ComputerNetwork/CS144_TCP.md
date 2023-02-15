@@ -116,3 +116,20 @@ std::string ByteStream::read(const size_t len) {
 ### 小节
 我们总说TCP是基于字节流，那么到底什么是字节流？字节流就是维护了一块有限大小的队列（内存），在这块有限的内存中，通过控制写入和读取的量，就像水龙头一样可以控制流量，来确保所有的数据都能被成功传输而不超出内存限制。
 
+## Lab1 
+
+Lab1主要是实现一个字符重组器，由于segment是乱序到达的，那么只要给每个到达的子串添加一个索引，就可以知道他们在整个字符串里的位置，即使乱序到达也可以按照顺序拼接。
+
+重组器和字节流的关系如图：
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/395544d72d15434ab3bba157ef511b89~tplv-k3u1fbpfcp-watermark.image?)
+
+在重组器中会维护一个滑动窗口，容量为capacity，用于存储未读取的字符串（已重组和未重组），一旦从中读取，滑动窗口左移，继续接受子串。
+
+实现思路大概是维护两个队列，一个用于存储字符串，一个用于标识当前索引是否已经接收到字符。
+
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d707755fd73c4e7abe59fb6e3dac2190~tplv-k3u1fbpfcp-watermark.image?)
+
+那么对于传入的子串需要考虑窗口容量，即子串index和length跟窗口expect_index和capacity的关系，有重叠的部分都需要截取。
+
+实验的这部分实现主要是为了`TCPReceiver`提供重组乱序segment的能力。
+

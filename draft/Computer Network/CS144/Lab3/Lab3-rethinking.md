@@ -1,9 +1,5 @@
 # Lab3-rethinking
 
-
-
-
-
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/46833ee416e84943a55306967b190b8f~tplv-k3u1fbpfcp-watermark.image?)
 
 重写Sender的时候发现好多ackno，seq，被绕晕了。
