@@ -464,7 +464,7 @@ Sliding window = [N, N + 1, N + 2], wait for ACK = N + 1, N + 2, N + 3
 
      计时器有一个特点，就是超时后如果远端窗口大小不为0，那么说明网络可能发生拥塞，那么需要double RTO，这就是TCP拥塞控制。
 
-    具体实现：
+具体实现：
 ```c++
 class TCPTimer {
   private:
