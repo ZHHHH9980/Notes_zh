@@ -131,7 +131,7 @@ TCP segement组成，非灰色的是需要重点关注的字段。
 ### segement_received()
 主要工作方法，每次接收到segment都会被调用。
 1. 如果有必要的话，设置ISN(Initial Sequence Number). 
-第一个到达且带有SYN flag的segemnt的序列号将是初始序列号，需要跟踪它以保证seq和absolute seq直之间的转换。
+第一个到达且带有SYN flag的segemnt的序列号将是初始序列号，需要跟踪它以保证seq和absolute seq之间的转换。
 2. 推送所有数据，或者流结束的标志给`StreamReassembler`。如果FIN被设置，那么payload的最后一个字节是整个流的最后一个字节。注意`StreamReassembler`需要流的索引从0开始，那么必须`unwrap`seqno来生成。
 
 ## TODO
