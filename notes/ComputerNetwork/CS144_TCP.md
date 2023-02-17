@@ -127,7 +127,8 @@ Lab1主要是实现一个字符重组器，由于segment是乱序到达的，那
 
 实现思路大概是维护两个队列，一个用于存储字符串，一个用于标识当前索引是否已经接收到字符。
 
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d707755fd73c4e7abe59fb6e3dac2190~tplv-k3u1fbpfcp-watermark.image?)
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/be8c9f8994984853acea264ad7309e94~tplv-k3u1fbpfcp-watermark.image?)
+
 
 那么对于传入的子串需要考虑窗口容量，即子串index和length跟窗口expect_index和capacity的关系，有重叠的部分都需要截取。
 
