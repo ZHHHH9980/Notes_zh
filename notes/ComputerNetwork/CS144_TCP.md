@@ -381,7 +381,8 @@ void TCPSender::send_segment(TCPSegment &seg) {
 这里的ack_received原本返回值应该是void，但是改成了bool，主要是为了之后通知上层TCPConnection是否接收到了合法的ackno。
 
 #### ACK机制
-![handshake.png](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/preview/boxcnQRm1Oh3vgpAAcS5QDt7v2b/?preview_type=16)
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f13110790af54c6e872040d3af104218~tplv-k3u1fbpfcp-watermark.image?)
+
 
 先回顾一下ACK的机制，ACK的值都是接收到的序列号x+1，有两个目的：
 1. 确认x序列号的segment已经接收到
@@ -469,26 +470,26 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     1. **Go-Back-N protocol**
     2. **Selective Repeat protocal**
 
-维护一个Silding window，size = 1采用Go-Back-N, size > 1 采用 Selective Repeat
+    维护一个Silding window，size = 1采用Go-Back-N, size > 1 采用 Selective Repeat
 
-```
-Go-Back-N
-发送 N, N + 1, N + 2
-Sliding window = [N], wait for ACK = NextSeqNumber， 如果ACK = NextSeqNumber超时，将会重传N，N + 1,N + 2
+    ```
+    Go-Back-N
+    发送 N, N + 1, N + 2
+    Sliding window = [N], wait for ACK = NextSeqNumber， 如果ACK = NextSeqNumber超时，将会重传N，N + 1,N + 2
 
-Seletive Repeat
-发送 N, N + 1, N + 2
-Sliding window = [N, N + 1, N + 2], wait for ACK = N + 1, N + 2, N + 3
-如果ACK = N + 1 超时，超时前接收到ACK = N + 2, N + 3
-将会重传只重传N 这个segment
+    Seletive Repeat
+    发送 N, N + 1, N + 2
+    Sliding window = [N, N + 1, N + 2], wait for ACK = N + 1, N + 2, N + 3
+    如果ACK = N + 1 超时，超时前接收到ACK = N + 2, N + 3
+    将会重传只重传N 这个segment
 
-```
+    ```
 
-这里是《自顶向下》的原文，跟实验文档对应上了：
+    这里是《自顶向下》的原文，跟实验文档对应上了：
 
-> Thus, TCP's error-recovery mechanism is probably best categorized as a hybrid of GBN & SR protocols
+    > Thus, TCP's error-recovery mechanism is probably best categorized as a hybrid of GBN & SR protocols
 
-**TCP 超时机制更像是二者的结合，TCP本地只维护一个`NextSeqNumber`（Go-Back_N)，通过`SendBase`（初始值）和`NextSeqNumber`来确认哪个包没收到，从而只重传没收到的初始包(Seletive Repeat)。**
+    **TCP 超时机制更像是二者的结合，TCP本地只维护一个`NextSeqNumber`（Go-Back_N)，通过`SendBase`（初始值）和`NextSeqNumber`来确认哪个包没收到，从而只重传没收到的初始包(Seletive Repeat)。**
 
 3. 拥塞控制
 
@@ -670,3 +671,162 @@ bool TCPSender::tick(const size_t ms_since_last_tick) {
 
 ## Lab4
 
+Lab4主要是讲之前的Sender和Receiver组合到一起，构成TCPConnection，在全局的角度上维护一些状态，从而实现TCP全双工通信的机制。
+实验文档里也提到，不需要太多代码
+> Much of your implementation will involve “wiring up” the public
+API of the TCPConnection to the appropriate routines in the TCPSender and TCPReceiver
+
+将Sender和Receiver一些公共API在合适的位置结合起来即可。
+### 回到起点
+
+先回顾一下最开始提到的这张图，现在回过头仔细看看，这里已经对TCPConnection要做的工作有个大体的描绘：
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/976daba69f744bb299f625fa99fea631~tplv-k3u1fbpfcp-watermark.image?)
+
+根据上边的红色箭头，TCP作为Server端，接收到segment后：
+- 将segment直接交给Receiver，让Receiver自己获取内部数据
+- 将segment中Sender关心的字段，ackno以及window_size交给Sender
+
+
+根据下边的绿色箭头，TCP作为Client端，发送segment:
+- Sender在发送的segment带上需要的seqno,SYN,payload,FIN等字段
+- Receiver在发送的segment带上ackno，window_size
+
+### 全局状态管理
+一个TCPConnection的状态流转图如下：
+
+上边绿色部分是握手阶段，中间是建立连接后的数据传输阶段(ESTABLISTED),下边是挥手阶段。
+
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6bf9e7f2312a4fbda1a5ef3f31657c71~tplv-k3u1fbpfcp-watermark.image?)
+
+这张图仅对整体的状态流转有一个概念即可，具体对应的状态都在`tcp_state.cc`里面：
+```c++
+TCPState::TCPState(const TCPState::State state) {
+    switch (state) {
+        case TCPState::State::LISTEN:
+            _receiver = TCPReceiverStateSummary::LISTEN;
+            _sender = TCPSenderStateSummary::CLOSED;
+            break;
+        case TCPState::State::SYN_RCVD:
+            _receiver = TCPReceiverStateSummary::SYN_RECV;
+            _sender = TCPSenderStateSummary::SYN_SENT;
+            break;
+    // ...
+    }
+```
+但看着这张图我一开始不知道从何下手，直到我看到了下边这两张图：
+
+![image.png](https://kiprey.github.io/2021/11/cs144-lab4/20180328001537836.jpg)
+![image.png](https://kiprey.github.io/2021/11/cs144-lab4/20180328001111303.jpg)
+
+对于三次握手，主要在segment_received里面处理状态：
+
+这里处理Server端的情况，接收到SYN之后，要从LISTEN态到SYN_RCVD态：
+```c++
+void TCPConnection::segment_received(const TCPSegment &seg) {
+    // ...
+
+    // TCPReceiver Status: LISTEN -> SYN_RECV
+    _receiver.segment_received(seg);
+
+    // TCPConnection Status: LISTEN -> SYN_RCVD
+    if (TCPState::state_summary(_receiver) == TCPReceiverStateSummary::SYN_RECV &&
+        TCPState::state_summary(_sender) == TCPSenderStateSummary::CLOSED) {
+
+        // 此时肯定是第一次调用 fill_window，因此会发送 SYN + ACK
+        // TCPSender Status: CLOSED -> SYN_SENT
+        connect();
+        return;
+    }
+
+    // ...
+}
+```
+
+那么Client端呢？Client端会主动调用`connect`这个API，因此状态直接从CLOSED->SYN_SENT，只需要给第二次握手一个ACK即可，并不需要在segment_received做其他特殊处理。
+
+### 四次挥手
+四次挥手也是TCPConnection的一个实现难点，实验文档里也提到了有两种结束方式：
+- 优雅退出
+- 非优雅退出
+
+非优雅退出就是接收/主动发送一个rst包来终止传输，这里不多赘述。
+
+#### 优雅退出
+有两种情况：
+- 延迟关闭 linger
+- 被动关闭 passive close
+
+文档里提了一些判断条件：
+
+> Prereq #1 The inbound stream has been fully assembled and has ended.
+
+> Prereq #2 The outbound stream has been ended by the local application and fully sent (including
+the fact that it ended, i.e. a segment with fin ) to the remote peer.
+
+> Prereq #3 The outbound stream has been fully acknowledged by the remote peer.
+
+延迟关闭和被动关闭都需要满足前提条件1&3，但是区别就在于如果是Client端，需要延迟关闭，如果是Served端，由于是Client端先结束的字节流，就走被动关闭的逻辑。
+
+参考这张图：
+![image.png](https://kiprey.github.io/2021/11/cs144-lab4/20180328001111303.jpg)
+
+实验文档让我们去判断inbound和outbound的情况来确认是否需要延迟关闭，这里我感觉这种写法更优雅清晰：
+
+直接根据当前Sender和Receiver的状态就可以获取到当前的实例是Client端还是Server端：
+
+```c++
+void TCPConnection::segment_received(const TCPSegment &seg) {
+    // ...
+
+    // 判断 TCP 断开连接时是否时需要等待
+    // CLOSE_WAIT
+    if (TCPState::state_summary(_receiver) == TCPReceiverStateSummary::FIN_RECV &&
+        TCPState::state_summary(_sender) == TCPSenderStateSummary::SYN_ACKED)
+        _linger_after_streams_finish = false;
+
+
+    // 如果到了准备断开连接的时候。服务器端先断
+    // CLOSED
+    if (TCPState::state_summary(_receiver) == TCPReceiverStateSummary::FIN_RECV &&
+        TCPState::state_summary(_sender) == TCPSenderStateSummary::FIN_ACKED && !_linger_after_streams_finish) {
+        _is_active = false;
+        return;
+    }
+}
+```
+
+延迟关闭，tick会告诉我们是否已经超时：
+```c++
+//! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
+void TCPConnection::tick(const size_t ms_since_last_tick) {
+    assert(_sender.segments_out().empty());
+    _sender.tick(ms_since_last_tick);
+    if (_sender.consecutive_retransmissions() > _cfg.MAX_RETX_ATTEMPTS) {
+        // 在发送 rst 之前，需要清空可能重新发送的数据包
+        _sender.segments_out().pop();
+        _set_rst_state(true);
+        return;
+    }
+    // 转发可能重新发送的数据包
+    _trans_segments_to_out_with_ack_and_win();
+
+    _time_since_last_segment_received_ms += ms_since_last_tick;
+
+    // 如果处于 TIME_WAIT 状态并且超时，则可以静默关闭连接
+    if (TCPState::state_summary(_receiver) == TCPReceiverStateSummary::FIN_RECV &&
+        TCPState::state_summary(_sender) == TCPSenderStateSummary::FIN_ACKED && _linger_after_streams_finish &&
+        _time_since_last_segment_received_ms >= 10 * _cfg.rt_timeout) {
+        _is_active = false;
+        _linger_after_streams_finish = false;
+    }
+}
+```
+
+## 详细代码参考
+这个实现让我眼前一亮就是直接根据当前receiver和sender状态来处理各种TCPConnection状态，直接跟`tcp_state.cc`一一对应，非常清晰：
+https://github.com/Kiprey/sponge/blob/master/libsponge/tcp_connection.cc
+
+
+## 心得
+
+长吁一口气...
