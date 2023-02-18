@@ -1,5 +1,52 @@
 # TCP
 
+## 背景
+“TCP/IP” 是一个非常宽泛的术语，通常指与 TCP/IP 协议相关的一切东西，其中包括，
+
+各种协议：例如 UDP、ARP 和 ICMP。
+各种应用：例如 TELNET, FTP, and rcp。
+甚至还包括网络媒介（network medium）。
+描述这些内容的一个更准确术语是 “internet technology”（因特网技术）。使用 internet technology 的网络称为 “internet”（因特网）。
+
+要理解 TCP/IP 技术，必须先理解下面的逻辑结构：
+
+                     ----------------------------
+                     |    network applications  |
+                     |                          |
+                     |...  \ | /  ..  \ | /  ...|
+                     |     -----      -----     |
+                     |     |TCP|      |UDP|     |
+                     |     -----      -----     |
+                     |         \      /         |
+                     |         --------         |
+                     |         |  IP  |         |
+                     |  -----  -*------         |
+                     |  |ARP|   |               |
+                     |  -----   |               |
+                     |      \   |               |
+                     |      ------              |
+                     |      |ENET|              |
+                     |      ---@--              |
+                     ----------|-----------------
+                               |
+         ----------------------o---------
+             Ethernet Cable
+
+                  Figure 1.  Basic TCP/IP Network Node
+这是 internet 上一台计算机内部各协议层的逻辑图（logical structure of the layered protocols）。每一台能够通过 internet 技术进行通信的计算机都有这样的逻辑结构。该逻 辑结构也决定了 internet 上的计算机的行为。关于这张图有几点说明：
+
+- 框（boxes）：表示数据经过计算机时，在这些地方处理数据
+- 框之间的连线（lines）：表示数据的流经路径
+- 最下面的横线：表示一根以太网网线（Ethernet cable）
+- o 符号：收发器（transceiver）
+- * 符号：IP 地址
+- @ 符号：以太网地址
+
+那么通过这幅图我们可以看到本文将实现的TCP(Transmission Control Protocol)位于整个internet技术的位置，应用层与网络层中间。
+
+TCP 提供了面向连接的字节流（ connection-oriented byte stream），而非无连接的数据报传送服务。TCP 保证传输，而 UDP 不保证。
+接下来的篇幅都将围绕CS144这个实验对TCP的原理和实现做一些简单的笔记。
+
 ## 总览-TCP的构成
 
 ![Figure.1](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/73a28253bb294627b32605addddfeeb2~tplv-k3u1fbpfcp-watermark.image?)
@@ -823,10 +870,35 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 ```
 
 ## 详细代码参考
-这个实现让我眼前一亮就是直接根据当前receiver和sender状态来处理各种TCPConnection状态，直接跟`tcp_state.cc`一一对应，非常清晰：
-https://github.com/Kiprey/sponge/blob/master/libsponge/tcp_connection.cc
+这个实现让我眼前一亮就是直接根据当前receiver和sender状态来处理各种TCPConnection状态，直接跟`tcp_state.cc`一一对应，非常清晰：[kiprey](https://github.com/Kiprey/sponge/blob/master/libsponge/tcp_connection.cc)
 
+## 参考
+
+- 这一篇我学到了如何用vscode debug c++ 代码 - [康宇PL's Blog](https://www.cnblogs.com/kangyupl/p/stanford_cs144_labs.html)
+- Lab1的重组字节流我参考了这一篇，代码写的很清晰，让我这种无厘头都看懂了- [misaka Lab1](https://www.misaka-9982.com/2022/01/25/CS144-Lab1/)
+
+- Lab2的TCP头部压缩需要32位整型和64位整型直接转换，有点像脑筋急转弯，我真的搞不定，卡了很久很久没写出来，实在没办法，参考了这一篇我才勉强理解要做什么，- [CS144计算机网络lab2：TCP receiver](https://zhuanlan.zhihu.com/p/265156728)
+- Lab2 Receiver需要暴露一个公共api，提供ackno，这一篇的实现让我大开眼界，原来根本不需要在segment_received记录那么多变量，直接根据reassembler的一些属性即可换算出ackno！，- [PKUFlyingPig](https://github.com/PKUFlyingPig/CS144-Computer-Network/blob/master/libsponge/tcp_receiver.cc)
+
+- 这一篇给了我一些启发，UP主的视频让我收到了鼓舞，原来我不是一个人在面向测试编程，- [计算机网络学习笔记-CS144](https://tarplkpqsm.feishu.cn/docx/doxcnpBEN4SG3vA9pVyCoANigBh)
+- 这一篇是偶然发现的，- [朴素TCP/IP教程](http://arthurchiao.art/blog/rfc1180-a-tcp-ip-tutorial-zh/#7-tcptransmission-control-protocol)
+
+- Lab3 TCPSender虽然面向测试编程通过了，但是我的代码实在是太糟糕了，一堆条件判断嵌套在一起，非常难读，这是因为我在边面向测试边理解导致的，最终我参考了这篇 - [lexssama's Blog](https://lexssama.github.io/2021/04/08/CS144-lab3/)
+    - 里面的timer写的真好，因为我对C++不是很熟悉，没有拆出一个类，这篇完美实现了，代码非常干净！ 
+    - fill_window填充数据的实现，每一行的Sender状态流转都有注释，清晰地表述了要做什么，为什么做
+- [RFC 6298](https://datatracker.ietf.org/doc/rfc6298/?include_text=1)
+- Lab4 TCPConnection全局状态一直懵懵懂懂，直到看了这一篇才有点理解 - [kiprey](https://kiprey.github.io/tags/CS144/)
+- 这一篇也是意外收获，自学CS指南，虽然网上有很多了，但是自己动手做过并且分享的很少，- [csdiy](https://csdiy.wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CS144/)
+- 应该还有几篇，以后再补充吧
 
 ## 心得
 
 长吁一口气...
+
+一个野路子出身的前端，只会一点JS，c++在此之前完全没接触过，第一次接触到Lab0就放弃了。后来听说组里遇到了网络问题，通过wireshark抓包发现是TCP一直在重传，才下定决心一定要学一遍，中间遇到了很多困难，但是已经有很多大佬无私分享了他们的心得，让我有足够底气完成一个又一个Lab，我相信还会有第三次的。一定比几个月前更从容。
+
+额外的收获是这两篇：
+- [计算机网络学习笔记-CS144](https://tarplkpqsm.feishu.cn/docx/doxcnpBEN4SG3vA9pVyCoANigBh)
+- [csdiy](https://csdiy.wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CS144/)
+
+下一个实验可能考虑： NJU OS: Operating System Design and Implementation
