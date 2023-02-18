@@ -380,6 +380,19 @@ void TCPSender::send_segment(TCPSegment &seg) {
 
 这里的ack_received原本返回值应该是void，但是改成了bool，主要是为了之后通知上层TCPConnection是否接收到了合法的ackno。
 
+#### ACK机制
+![handshake.png](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/preview/boxcnQRm1Oh3vgpAAcS5QDt7v2b/?preview_type=16)
+
+先回顾一下ACK的机制，ACK的值都是接收到的序列号x+1，有两个目的：
+1. 确认x序列号的segment已经接收到
+2. 期待对方发送x+1这个序列号的segment
+
+由于一次性可能发送很多segment，那么对应的ACK也很可能是乱序接收的，就会出现收到过期的ACK等问题，那么校验合法的ACK非常有必要。
+首先还是围绕这幅图，看看ackno是否合法（落入发送窗口范围）：
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bbbaeea683f640489ab4e00fc9e0ecc8~tplv-k3u1fbpfcp-watermark.image?)
+
+如果是合法的，那么就右移滑动窗口，并且把已经确认接收到的segment从`segment_track`里面移除。
+ack了发送的segment之后，窗口又有了新的空间，继续`fill_window`发送数据。
 ```c++
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
     uint64_t abs_ackno = unwrap(ackno, _isn, _send_base);
@@ -420,18 +433,35 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 }
 ```
 
-前半部分还是围绕这幅图，看看ackno是否合法（落入发送窗口范围）：
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bbbaeea683f640489ab4e00fc9e0ecc8~tplv-k3u1fbpfcp-watermark.image?)
-
-如果是合法的，那么就右移滑动窗口，并且把已经确认接收到的segment从`segment_track`里面移除。
-ack了发送的segment之后，窗口又有了新的空间，继续`fill_window`发送数据。
 
 ### timer 
 
 文档里推荐计时器单独写一个类。
 
 1. 调用时机以及重置等操作可参考 RFC6298:
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/196d4e516bbf4a749fff1f679f15285f~tplv-k3u1fbpfcp-watermark.image?)
+
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/acc224367856458a881dc3e3f9a786a5~tplv-k3u1fbpfcp-watermark.image?)
+
+翻译一下：
+
+    5.1 每次发送一个数据包（send_segment），如果计时器没有开启，则开启它
+
+    5.2 当所有发送出去的数据都被ack，关闭重传计时器(一定时间间隔Sender的tick方法会被调用，在这里做判断)
+
+    5.3 当有新的ACK确认了已发送出去的数据，重置重传定时器，将超时时间恢复到初始的RTO
+
+    如果重传计时器超时，有如下操作：
+
+    5.4 内部维护的数据结构会记录已发送但是为被确认的segment，如果超时，重传最早发送过的segment，即队头的segment
+
+    5.5 - 5.7 参考实验文档的实现即可，这块跟实验文档不太一样
+
+    实验文档里对于超时的操作是：
+    
+    1. 重置等待时间=0
+    2. 判断远端窗口大小，如果为0，那么double RTO
+
+
 
 2. 重传机制
 自动重传有两种协议，一种是停止等待协议，另一种是流水线（pipelining)协议，这里需要实现的自然是效率高的pipelining,常见的pipelining的协议有两种：
