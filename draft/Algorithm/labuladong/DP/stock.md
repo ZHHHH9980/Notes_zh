@@ -150,4 +150,9 @@ var maxProfit = function(prices) {
 };
 ```
 
-TODO: 找零钱问题
+#### 找零钱问题思考
+
+突然想到这个问题是因为这里的coin的数量可以是无限的，以为也需要用类似caseII的情况来分析，即`k = +Infinity`，但其实并不是类似问题，因`coin`的数量并不是状态，而是这道题最终需要求的最值！
+
+[coin change](https://leetcode.com/problems/coin-change/submissions/901618434/)
+
