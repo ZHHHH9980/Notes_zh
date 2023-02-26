@@ -10,6 +10,8 @@
 - [121. Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/#/description)
 - [122. Best Time to Buy and Sell Stock II](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/#/description)
 - [123. Best Time to Buy and Sell Stock III](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/#/description)
+- [188. Best Time to Buy and Sell Stock IV](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/)
+- [714. Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/)
 
 
 对于每个问题，我们都能获取到优秀的帖子告诉我们如何解决。然而，大部分帖子并没有点出这一系列问题之间的关联，并且难以形成一个套路来解决这一系列问题。这里我将介绍一个非常通用的解决方案，专门针对六个股票买卖问题。
@@ -119,6 +121,41 @@ var maxProfit = function(prices) {
 
 [123. Best Time to Buy and Sell Stock III](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/#/description)
 
+##### 常规解法：dp table
+
+```java
+public int maxProfit(int[] prices) {
+    int max_k = 2, n = prices.length;
+    int[][][] dp = new int[n][max_k + 1][2];
+
+    for (int i = 0; i < n; i++) {
+        for (int k = max_k; k >= 1; k--) {
+            if (i - 1 == -1) {
+                // 处理 base case
+                dp[i][k][0] = 0;
+                dp[i][k][1] = -prices[i];
+                continue;
+            }
+
+            if (k == 0) {
+                // base case
+                dp[i][k][0] = 0;
+                dp[i][k][1] = -Interger.MIN_VALUE;
+                continue;
+            }
+
+            dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+            dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+        }
+    }
+    
+    // 穷举了 n × max_k × 2 个状态，正确。
+    return dp[n - 1][max_k][0];
+}
+```
+
+##### 穷举所有状态转移方程
+
 与`k=1`的情况相似，目前每一天的状态有以下几种`T[i][1][0]` `T[i][1][1]` `T[i][2][1]` `T[i][2][0]`，对应的递归关系如下：
 ```
 T[i][2][0] = max(T[i - 1][2][0], T[i - 1][2][1] + price[i])
@@ -126,7 +163,6 @@ T[i][2][1] = max(T[i - 1][2][1], T[i - 1][1][1] - price[i])
 T[i][1][0] = max(T[i - 1][1][0], T[i - 1][1][1] + price[i])
 T[i][1][1] = max(T[i - 1][1][1], T[i - 1][0][1] - price[i]) = max(T[i - 1][1][1], -price[i])
 ```
-
 
 ```js
 /**
@@ -156,3 +192,204 @@ var maxProfit = function(prices) {
 
 [coin change](https://leetcode.com/problems/coin-change/submissions/901618434/)
 
+#### caseIV: k = +arbitary
+
+这种情况就比较复杂了，如果光用caseIII的dp table来解决，那么总共要穷举n × max_k × 2个状态，如果max_k是无穷大，那么空间消耗也是无穷大，就解不了这个问题。但是这题有一个边界条件，就是n / 2，如果k > n / 2，那么k与k = +Infinity情况相同，因为一天买一天卖，最多允许交易的次数 = 总天数 / 2。
+
+```java
+class Solution {
+    public int maxProfit(int k, int[] prices) {
+        int n = prices.length;
+
+        // k = infinity
+        // T[i][k][0] = Math.max(T[i - 1][k][0], T[i - 1][k][1] + prices[i])
+        // T[i][k][1] = Math.max(T[i - 1][k][1], T[i - 1][k - 1][0] - prices[i])
+
+        if (k > n / 2) {
+            int T_ik0 = 0;
+            int T_ik1 = Integer.MIN_VALUE;
+
+            for (int price: prices) {
+                T_ik0 = Math.max(T_ik0, T_ik1 + price);
+                T_ik1 = Math.max(T_ik1, -price);
+            }
+
+            return T_ik0;
+        }
+
+        int[][][] dp = new int[n][k + 1][2];
+
+        for (int i = 0; i < prices.length; i++) {
+            for (int j = k; j >= 0; j--) {
+                // base case
+                if (i - 1 == -1) {
+                    dp[i][j][0] = 0;
+                    dp[i][j][1] = -prices[i];
+                    continue;
+                }
+
+                // base case
+                if (j == 0) {
+                    dp[i][j][0] = 0;
+                    dp[i][j][1] = Integer.MIN_VALUE;
+                    continue;
+                }
+
+                dp[i][j][0] = Math.max(dp[i - 1][j][0], dp[i - 1][j][1] + prices[i]);
+                dp[i][j][1] = Math.max(dp[i - 1][j][1], dp[i - 1][j - 1][0] - prices[i]);
+            }
+        }
+
+        return dp[n - 1][k][0];
+    }
+}
+```
+两个base case持有股票数=1给的值是不一样的，这里是我的思考：
+1. i - 1 = -1的情况说明这是股票交易的第一天，也就是可以取到i = 0的情况（这一天已经可以买股票了），如果不买就=0，卖就得亏prices[i]元
+    对于1这种情况我一开始给的是Integer.MIN_VALUE，是有问题的，这里之所以是base case，是因为无法从前一天做推导。
+2. j == 0 这种情况不一样，这种情况的意思是，允许最大交易次数为0的情况下，不应该持有任何股票！！所以是dp[i][j][1] = Integer.MIN_VALUE;
+
+
+#### caseV: cooldown
+
+由于卖出后一天不能再买，得等一天，状态转移方程：
+```
+T[i][k][0] = max(T[i - 1][k][0], T[i - 1][k][1] + prices[i]) 
+T[i][k][1] = max(T[i - 1][k][1], T[i - 2][k][0] - prices[i]) // 区别在这里
+```
+
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        // rest, sell
+        // T[i][k][0] = max(T[i - 1][k][0], T[i - 1][k][1] + price)
+        // rest, buy
+        // T[i][k][1] = max(T[i - 1][k][1], T[i - 2][k][0] - price)
+        // i = 0, 1时， i - 1 和 i - 2都是不合法的索引，所以需要特化处理
+
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+
+        for (int i = 0; i < n; i++) {
+            if (i - 1 == -1) {
+                dp[i][0] = 0;
+                dp[i][1] = -prices[i];
+                continue;
+            }
+
+            // 前两天都是base case 
+            if (i - 2 == -1) {
+                dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+                // dp[i][1] = Math.max(dp[i - 1][1], dp[-1][0] - prices[i]);
+                // dp[i][1] = Math.max(dp[i - 1][1], 0 - prices[i]);
+                dp[i][1] = Math.max(dp[i - 1][1], -prices[i]);
+                continue;
+            }
+
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 2][0] - prices[i]);
+        }
+
+        return dp[n - 1][0];
+    }
+}
+```
+
+##### 状态压缩
+
+本质上今天的状态只跟`i - 1`和`i - 2`有关系。
+
+```java
+
+public int maxProfit(int[] prices) {
+    // rest, sell
+    // T[i][k][0] = max(T[i - 1][k][0], T[i - 1][k][1] + price)
+    // rest, buy
+    // T[i][k][1] = max(T[i - 1][k][1], T[i - 2][k][0] - price)
+
+    int preT_ik0 = 0, T_ik0 = 0, T_ik1 = Integer.MIN_VALUE;
+
+    for (int price: prices) {
+        int old_Tik0 = T_ik0;
+        T_ik0 = Math.max(T_ik0, T_ik1 + price);
+        T_ik1 = Math.max(T_ik1, preT_ik0 - price);
+        preT_ik0 = old_Tik0;
+    }
+
+    return T_ik0;
+}
+```
+
+#### caseVI: k = +Infinity, with transaction fee
+
+```
+ // rest or sell
+ T[i][k][0] = max(T[i - 1][k][0], T[i - 1][k][1] + price)
+ // rest or buy
+ T[i][k][1] = max(T[i - 1][k][1], T[i - 1][k - 1][0] - price - fee)
+            = max(T[i - 1][k][1], T[i - 1][k][0] - price - fee)
+
+ // k = Infinity，已经不需要考虑k 这个状态了 
+ T[i][0] = max(T[i - 1][0], T[i - 1][1] + price)
+ T[i][1] = max(T[i - 1][1], T[i - 1][0] - price - fee)
+```
+
+这个状态转移方程是有问题的，实际上是卖的时候才收手续费，而不是买，我是看example才醒悟过来：
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6b841dc53f08404cac1f019d68db294e~tplv-k3u1fbpfcp-watermark.image?)
+
+代码里已经更正：
+
+```java
+class Solution {
+    public int maxProfit(int[] prices, int fee) {
+        // rest or sell
+        // T[i][k][0] = max(T[i - 1][k][0], T[i - 1][k][1] + price)
+        // rest or buy
+        // T[i][k][1] = max(T[i - 1][k][1], T[i - 1][k][0] - price - fee)
+
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+
+        for (int i = 0; i < n; i++) {
+            if (i - 1 == -1) {
+                dp[i][0] = 0;
+                dp[i][1] = -prices[i];
+                continue;
+            }
+
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i] - fee);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+    
+        return dp[n - 1][0];
+    }
+}
+```
+
+##### 状态压缩
+
+
+不要再用int类型，避免整形溢出。
+
+```
+class Solution {
+    public int maxProfit(int[] prices, int fee) {
+        // rest or sell
+        // T[i][k][0] = max(T[i - 1][k][0], T[i - 1][k][1] + price - fee)
+        // rest or buy
+        // T[i][k][1] = max(T[i - 1][k][1], T[i - 1][k][0] - price)
+
+        long T_ik0 = 0, T_ik1 = Integer.MIN_VALUE;
+
+        for (int price: prices) {
+            long old_Tik0 = T_ik0;
+
+            T_ik0 = Math.max(T_ik0, T_ik1 + price - fee);
+            T_ik1 = Math.max(T_ik1, old_Tik0 - price);
+        }
+
+        return (int)T_ik0;
+    }
+}
+```
