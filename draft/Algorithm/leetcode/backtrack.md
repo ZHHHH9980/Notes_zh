@@ -150,3 +150,122 @@ public:
 };
 
 ```
+
+
+## 排列-组合-子集问题
+
+### 元素无重复不可复选
+
+[216. Combination Sum III](https://leetcode.com/problems/combination-sum-iii/description/)
+
+为了避免重复选择同一元素，进入递归的索引需要+1
+
+```js
+var backtrack = function(target, n, res, start, record = []) {
+    if (record.length == n && target == 0) {
+        res.push(record.map(i => i));
+        return;
+    }
+
+    // 超出限定长度 直接终止
+    if (record.length > n) {
+        return;
+    }
+
+    for (let i = start; i <= 9; i++) {
+        if (i > target) {
+            continue;
+        }
+
+        record.push(i);
+        backtrack(target - i, n, res, i + 1, record);
+        record.pop();
+    }
+}
+
+var combinationSum3 = function(k, n) {
+     var res = [];
+
+     backtrack(n, k, res, 1);
+
+     return res;
+};
+```
+
+### 元素无重复可复选
+
+[39. Combination Sum](https://leetcode.com/problems/combination-sum/description/)
+
+输入数组内元素无重复的的，可以重复选择。
+
+这里一开始没想到怎么处理这种问题，进入递归后又从第一个元素开始做选择。
+
+### 错误解法
+``` js
+var backtrack = function(candidates, target, res, record = []) {
+    if (target == 0) {
+        res.push(record.map(i => i));
+        return;
+    }
+
+    // 每次都从0开始，也就是以前选过的元素还会再次选择
+    for (let i = 0; i < candidates.length; i++) {
+        var num = candidates[i];
+
+        if (num > target) {
+            continue;
+        }
+
+        // make choice
+        record.push(num);
+        backtrack(candidates, target - num, res, record);
+        
+        // reset choice
+        record.pop();
+    }
+}
+```
+
+那么就会出现重复的组合：
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/cafae7f7f6e34e59a3f1efd7400ccf7f~tplv-k3u1fbpfcp-watermark.image?)
+
+那么为了避免出现重复组合，应该传入目前的索引作为起点（避免再从0开始重复做选择）
+
+```js
+/**
+ * @param {number[]} candidates
+ * @param {number} target
+ * @return {number[][]}
+ */
+
+var backtrack = function(candidates, start, target, res, record = []) {
+    if (target == 0) {
+        res.push(record.map(i => i));
+        return;
+    }
+
+    for (let i = start; i < candidates.length; i++) {
+        var num = candidates[i];
+
+        if (num > target) {
+            continue;
+        }
+
+        // make choice
+        record.push(num);
+        
+        // 剪掉之前已经选过的部分
+        backtrack(candidates, i, target - num, res, record);
+        
+        // reset choice
+        record.pop();
+    }
+}
+
+var combinationSum = function(candidates, target) {
+    var res = [];
+    backtrack(candidates, 0, target, res);
+
+    return res;
+};
+```
