@@ -71,3 +71,42 @@ class Solution {
     }
 }
 ```
+
+### [House Robber III](https://leetcode.com/problems/house-robber-iii/)
+
+dp函数的定义是，传入当前根节点，返回一个二元组，第一个值返回抢根节点的最大值，第二只返回不抢根节点的最大值。
+
+```js
+/**
+ * @param {TreeNode} root
+ * @return {number, number}[]
+ */
+ // [rob, no_rob] 抢/不抢当前根节点的最大值
+
+var dp = function(root) {
+    if (root == null) {
+        return [0, 0];
+    }
+
+    var left = dp(root.left);
+    var right = dp(root.right);
+
+    var rob = root.val + left[1] + right[1];
+
+    // 抢不抢子节点看情况
+    var no_rob = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
+
+    return [rob, no_rob];
+}
+
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var rob = function(root) {
+    var [rob, no_rob] = dp(root);
+
+    return Math.max(rob, no_rob);
+};
+
+```

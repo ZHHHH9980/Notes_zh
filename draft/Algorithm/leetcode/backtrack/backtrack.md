@@ -360,3 +360,10 @@ var subsetsWithDup = function(nums) {
     return res;
 };
 ```
+
+// 以数字的视角选择桶
+
+// 常规遍历
+```js
+
+```
