@@ -187,3 +187,23 @@ var postorderTraversal = function(root) {
     return res;
 };
 ```
+
+这里在总结一下为什么需要记录last这个变量，根因还是因为`peek`这个操作，并不会让根节点root直接出栈。
+
+场景：
+
+```
+    root
+       \
+      right
+
+    stack = [root]
+```
+
+流程
+1. stack 已经让root 压栈
+2. cur = stack.peek() -> cur = root
+3. 发现cur.right !== null -> cur = right
+4. 输出right.val
+5. cur = null
+6. cur = stack.peek() -> cur = root 此时又回到原点 如果不记录right是否被访问，那么将会死循环
