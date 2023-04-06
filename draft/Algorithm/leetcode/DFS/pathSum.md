@@ -1,8 +1,12 @@
 # pathSum
 
+## [pathSumII](https://leetcode.com/problems/path-sum-ii/description/)
+
 > Given the root of a binary tree and an integer targetSum, return all root-to-leaf paths where the sum of the node values in the path equals targetSum.
 
 关键是**root-to-leaf**，那么肯定需要遍历所有节点了。既然是根节点到叶子节点的路径和，首先应该想到DFS
+
+非常喜欢这道题，递归比较简单，迭代可以让人更加理解后序遍历的意义。
 
 ## DFS
 
@@ -156,3 +160,6 @@ var pathSum = function(root, targetSum) {
 为什么要记录prev ?
 
 主要是因为peek的操作。
+
+具体看[traverseBinaryTree](https://github.com/ZHHHH9980/Notes_zh/blob/master/draft/Algorithm/leetcode/DFS/traverseBinaryTree.md)
+关于后序遍历的操作。里面有讲解为什么不记录prev会导致死循环。
