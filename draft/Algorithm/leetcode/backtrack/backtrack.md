@@ -91,7 +91,38 @@ public:
 
 ### 组合
 
-[216. Combination Sum III](https://leetcode.com/problems/combination-sum-iii/description/)
+#### [77. Combinations](https://leetcode.com/problems/combinations/description/)
+
+```js
+/**
+ * @param {number} n
+ * @param {number} k
+ * @return {number[][]}
+ */
+
+var backtrack = function(res, n, k, start, temp = []) {
+    if (temp.length === k) {
+        res.push(temp.map(i => i));
+        return;
+    }
+
+    for (let i = start; i <= n; i++) {
+        temp.push(i);
+
+        backtrack(res, n, k, i + 1, temp);
+
+        temp.pop();
+    }
+}
+var combine = function(n, k) {
+    var res = [];
+    backtrack(res, n, k, 1);
+
+    return res;
+};
+```
+
+#### [216. Combination Sum III](https://leetcode.com/problems/combination-sum-iii/description/)
 
 为了避免重复选择同一元素，进入递归的索引需要+1
 
@@ -124,6 +155,47 @@ var combinationSum3 = function(k, n) {
      backtrack(n, k, res, 1);
 
      return res;
+};
+```
+
+#### [40. Combination Sum II](https://leetcode.com/problems/combination-sum-ii/)
+
+这道题没做过的话确实有点难，尤其是会出现重复的方案，那么就需要重新排序将相同的元素紧挨在一起。到时候再剪枝。
+
+```js
+/**
+ * @param {number[]} candidates
+ * @param {number} target
+ * @return {number[][]}
+ */
+
+var backtrack = function(res, candidates, target, start = 0, temp = [], cur = 0) {
+    if (cur > target) {
+        return;
+    } else if (cur === target) {
+        res.push(temp.map(i => i));
+        return;
+    }
+
+    for (let i = start; i < candidates.length; i++) {
+        if (i > start && candidates[i] == candidates[i - 1]) {
+            continue;
+        }
+
+        var node = candidates[i];
+        temp.push(node);
+        backtrack(res, candidates, target, i + 1, temp, cur + node);
+
+        temp.pop();
+    }
+}
+var combinationSum2 = function(candidates, target) {
+    var res = [];
+    
+    candidates.sort((a, b) => a - b);
+    backtrack(res, candidates, target);
+
+    return res;
 };
 ```
 
