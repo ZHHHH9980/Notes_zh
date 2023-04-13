@@ -1,6 +1,11 @@
 # [22. Generate Parenthesis](https://leetcode.com/problems/generate-parentheses/submissions/)
 
+这道题在DFS和回溯的情况下，需要把握好"("和")"的关系，也就是生成字符串的过程中(append)，"("个数永远大于等于")"，否则将无法生成一个合法的括号。
+
+
 ## 递归解法
+
+这里应该叫DFS更合适
 
 ```js
 var _generate = function(n, str, left, right, res) {
@@ -19,7 +24,6 @@ var _generate = function(n, str, left, right, res) {
         }
         _generate(n, str + ')', left, right + 1, res);
     }
-    
 }
 
 var generateParenthesis = function(n) {
@@ -74,3 +78,57 @@ var generateParenthesis = function (n) {
   return res;
 };
 ```
+
+## DP 
+
+dp[i] 定义：包含i对有效匹配的括号。
+
+```
+dp[0] = [""]
+dp[1] = ["()"]
+dp[2] = ["()()", "(())"]
+```
+
+现在已知dp[2], dp[1], dp[0], 如何推导出dp[3] ? 
+
+```
+( + dp[0] ) + dp[2] = ()()() and ()(())
+( + dp[1] ) + dp[1] = (())()
+( + dp[2] ) + dp[0] = (()()) and ((()))
+```
+
+因此这个递归关系式为：
+```
+dp[i] = ( + dp[j] ) + dp[i - j - 1]
+
+j 的范围为 [0...i - 1]
+```
+
+那么现在需要生成n对有效括号的组合，i的范围为[0...n], j的范围为[0...i-1]，根据递归关系取出之前的子组合生成新的组合即可：
+
+```js
+
+ function generateParenthesis(n) {
+  var dp = [[""]];
+
+  for (let i = 1; i <= n; i++) {
+    dp[i] = [];
+    for (let j = 0; j < i; j++) {
+      var left = dp[j];
+      var right = dp[i - j - 1];
+      
+      for (let l of left) {
+        for (let r of right) {
+          dp[i].push(`(${l})${r}`);
+        }
+      }
+    }
+  }
+
+  return dp[n];
+}
+```
+
+### 参考
+
+[DP](https://leetcode.com/problems/generate-parentheses/solutions/594770/c-2-solutions-backtracking-and-dp/?q=DP&orderBy=most_votes)

@@ -69,7 +69,7 @@ var isSymmetric = function(root) {
 
 ```java
 public boolean isSymmetric(TreeNode root) {
-    return root==null || isSymmetricHelp(root.left, root.right);
+    return root == null || isSymmetricHelp(root.left, root.right);
 }
 
 private boolean isSymmetricHelp(TreeNode left, TreeNode right){
