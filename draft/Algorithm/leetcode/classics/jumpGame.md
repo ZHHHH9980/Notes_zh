@@ -47,6 +47,24 @@ var canJump = function(nums) {
 
 贪心的思路是每走一步都更新一下全局的最优解，尽可能“走更多步数”来到达最后一个位置。
 
+```js
+function canJump(nums) {
+    var farthest = 0;
+
+    for (let i = 0; i < nums.length - 1; i++) {
+        // 看看最远能走到哪里
+        farthest = Math.max(farthest, nums[i] + i);
+
+        // 卡住跳不动了
+        if (farthest <= i) {
+            return false;
+        }
+    }
+
+    return farthest >= nums.length - 1;
+}
+```
+
 ## 参考
 
 [C++ Solutions - Greedy | Recursive | DP](https://leetcode.com/problems/jump-game/solutions/1150021/c-solutions-greedy-recursive-dp/?orderBy=most_votes)

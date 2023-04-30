@@ -32,6 +32,49 @@ class Solution {
     }
 }
 ```
+
+
+过几天自己用递归写了一版，好几次都没通过，一个是memo，一个是memo存在的判断
+```
+if (memo[n]) {
+    return memo[n];
+}
+```
+
+本来这行代码没啥，但是如果test case是这种场景，那就一直进不去memo里边...
+
+```
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+```
+
+```ts
+// do(n) 代表从0 - n号房抢劫的最大收益
+function doRob(n: number, nums: number[], memo = {}) {
+    if (n < 0) {
+        return 0;
+    }
+
+    // if (memo[n]) 
+    if (memo[n] !== undefined) {
+        return memo[n];
+    }
+
+    const rob = doRob(n - 2, nums, memo) + nums[n];
+    const noRob = doRob(n - 1, nums, memo);
+
+    memo[n] = Math.max(rob, noRob);
+
+    return memo[n];
+}
+
+function rob(nums: number[]): number {
+    var n = nums.length;
+
+    return doRob(n - 1, nums);
+};
+```
+
+
 ## 213. House Robber II
 
 到这道题就开始自闭了，环形数组，压根不知道该怎么找状态方程。
@@ -69,6 +112,21 @@ class Solution {
 
         return dp_i1;
     }
+}
+```
+
+`robRange`这种状态压缩的写法是基于
+```
+ T[i] = max(T[i - 1], T[i - 2] + money);
+```
+
+这个状态方程，可见当前状态只跟前两个状态相关，这就是妥妥的斐波那契数列，不用想太复杂。
+
+因此还有一个边界条件，也就是在长度为1的情况下，斐波那契的推导意义就不大了，至少需要两个状态来做推导。
+
+```
+if (n == 1) {
+    return nums[0];
 }
 ```
 
